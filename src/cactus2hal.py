@@ -55,7 +55,7 @@ def main():
         dbString = experimentObject.getDiskDatabaseString()
     
     
-    #testing output - to be removed    
+    #testing output - will remove those when system call put in   
     #print genomeName
     #print experimentFilePath
     #print experimentFileXML
