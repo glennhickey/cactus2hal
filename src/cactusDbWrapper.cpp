@@ -6,9 +6,6 @@
 #include <cassert>
 #include <iostream>
 #include <stdexcept>
-extern "C" {
-#include "cactus.h"
-}
 #include "cactusDbWrapper.h"
 
 using namespace std;

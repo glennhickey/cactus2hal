@@ -6,8 +6,15 @@
 #include <cassert>
 #include <stdexcept>
 #include <iostream>
+extern "C" {
+#include "commonC.h"
+#include "sonLib.h"
 #include "cactus.h"
+}
+
+
 #include "cactusDbWrapper.h"
+
 
 using namespace std;
 
@@ -27,6 +34,8 @@ static void verifyArgs(int argc, char** argv)
 
 int main(int argc, char** argv)
 {
+  stList* list = stList_construct();
+  stList_destruct(list);
   try
   {
     verifyArgs(argc, argv);

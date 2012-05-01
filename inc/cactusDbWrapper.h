@@ -9,6 +9,8 @@
 
 #include <string>
 extern "C" {
+#include "commonC.h"
+#include "sonLib.h"
 #include "cactus.h"
 }
 
