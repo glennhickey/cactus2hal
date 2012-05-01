@@ -17,7 +17,7 @@ dataSetsPath=/Users/hickey/Documents/Devel/genomes/datasets
 
 cflags += -I ${sonLibPath} -I ${cactusPath} -I ${halPath} ${tokyoCabinetIncl} ${kyotoTycoonIncl} ${mysqlIncl} ${pgsqlIncl}
 cppflags += -I ${sonLibPath} -I ${cactusPath} -I ${halPath} ${tokyoCabinetIncl} ${kyotoTycoonIncl} ${mysqlIncl} ${pgsqlIncl}
-basicLibs = ${sonLibPath}/sonLib.a ${sonLibPath}/cuTest.a ${cactusPath}/cactusLib.a ${halPath}/halLib.a ${dblibs}
+basicLibs = ${cactusPath}/cactusLib.a ${sonLibPath}/sonLib.a ${sonLibPath}/cuTest.a ${cactusPath}/cactusLib.a ${halPath}/halLib.a ${dblibs}
 basicLibsDependencies = ${sonLibPath}/cuTest.a 
 
 # hdf5 compilation is done through its wrappers.
