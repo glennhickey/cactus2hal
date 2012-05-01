@@ -62,7 +62,7 @@ def main():
     #print experimentObject
     #print halFilePath
     #print dbString
-# pass them to the c parser, and finally parse them in there          
+# pass them to the c parser, parse them in there          
       
 if __name__ == "__main__":
     main();
