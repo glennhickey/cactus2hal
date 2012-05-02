@@ -12,12 +12,13 @@
 
 class HALparser{
 public:
-	hal::Genome* convertToHALGenome();
+	hal::Genome* convertToHALGenome();//this and get Genome size should have the same args
 	hal::Alignment* updateHALAlignment();
 
 protected:
 	hal::Alignment* theAlignment;
 	hal_size_t* getGenomeSize();
+	void parseOptions(int argc, char **argv, char *seqName, uint32_t *position);
 };
 
 
