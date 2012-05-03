@@ -32,7 +32,8 @@ class CommandLine(object) :
                                              prefix_chars = '-')
         self.parser.add_argument('xml_list', type=argparse.FileType('r'), action = 'store', 
                                  help="xml file of all alignments that need to be parsed")
-        
+        self.parser.add_argument('HAL_file_path', type=str, action = 'store', 
+                                 help="file path where newly created HAL file is to be stored.")
         self.args = vars(self.parser.parse_args())
         
       
