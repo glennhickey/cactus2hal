@@ -16,7 +16,7 @@ public:
 	hal::Alignment* updateHALAlignment();
 
 protected:
-	hal::Alignment* theAlignment;
+
 	hal_size_t* getGenomeSize();
 	void parseOptions(int argc, char **argv, std::string &MAFFilePath,
 			std::string &DBPath, std::string &HALAlignmentPath);

@@ -17,10 +17,16 @@
 #include <stdint.h>
 #include <string.h>
 
+#include "utils.h"
+#include "halAlignmentInstance.h"
+
 using namespace std;
 
-void parseOptions(int argc, char **argv, std::string &MAFFilePath,
-		std::string &DBPath, std::string &HALAlignmentPath) {
+//AlignmentPtr hal::Alignment* theAlignment;
+
+
+void parseOptions(int argc, char **argv, string &MAFFilePath,
+		string &DBPath,string &HALAlignmentPath) {
     int c;
     int setMAFpath = 0, setDBPath = 0, setHALPath=0;
 
@@ -47,17 +53,17 @@ void parseOptions(int argc, char **argv, std::string &MAFFilePath,
         case 'm':
             setMAFpath = 1;
             MAFFilePath=optarg;
-            //sscanf(optarg, "%s", MAFFilePath);
+
             break;
         case 'd':
         	setDBPath = 1;
         	DBPath=optarg;
-        	//sscanf(optarg, "%s", DBPath);
+
         	break;
         case 'h':
         	setHALPath = 1;
         	HALAlignmentPath=optarg;
-            //sscanf(optarg, "%s", HALAlignmentPath);
+
             break;
         case '?':
             break;
@@ -70,7 +76,7 @@ void parseOptions(int argc, char **argv, std::string &MAFFilePath,
     }
     // Check there's nothing left over on the command line
     if (optind < argc) {
-        std::string errorString= "Unexpected arguments:";
+        string errorString= "Unexpected arguments:";
         while (optind < argc) {
             errorString.append(" ");
             errorString.append(argv[optind++]);
@@ -81,6 +87,12 @@ void parseOptions(int argc, char **argv, std::string &MAFFilePath,
 
 
 int main(int argc, char *argv[]){
+	string MAFfilepath,MAFdb,HALAlignFilePath;
+
+	parseOptions(argc, argv,  MAFfilepath, MAFdb,HALAlignFilePath);
+	if(!fileExists(HALAlignFilePath)){
+		//theAlignment
+	}
 
 }
 
