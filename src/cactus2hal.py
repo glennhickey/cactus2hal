@@ -55,13 +55,13 @@ def main():
         dbString = experimentObject.getDiskDatabaseString()
     
     
-    #testing output - will remove those when system call put in   
-    #print genomeName
-    #print experimentFilePath
-    #print experimentFileXML
-    #print experimentObject
-    #print halFilePath
-    #print dbString
+#    testing output - will remove those when system call put in   
+    print genomeName
+    print experimentFilePath
+    print experimentFileXML
+    print experimentObject
+    print halFilePath
+    print dbString
 # pass them to the c parser, parse them in there          
       
 if __name__ == "__main__":

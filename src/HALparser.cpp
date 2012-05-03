@@ -7,73 +7,75 @@
  *     Dent Earl's MAFTools library.
  */
 
-#include <assert.h>
+#include <iostream>
+#include <sstream>
+#include <string>
 #include <getopt.h>
-#include <limits.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
-#include <time.h>
-#include <unistd.h>
 
-void parseOptions(int argc, char **argv, char *seqName, uint32_t *position) {
+using namespace std;
+
+void parseOptions(int argc, char **argv, std::string &MAFFilePath,
+		std::string &DBPath, std::string &HALAlignmentPath) {
     int c;
-    int setSName = 0, setPos = 0;
-    int32_t tempPos = 0;
+    int setMAFpath = 0, setDBPath = 0, setHALPath=0;
+
+
     while (1) {
         static struct option long_options[] = {
             //{"debug", no_argument, &debug_flag, 1},
             //{"verbose", no_argument, 0, 'v'},
             //{"help", no_argument, 0, 'h'},
-            {"seq",  required_argument, 0, 's'},
-            {"pos",  required_argument, 0, 'p'},
-            {0, 0, 0, 0}
+            {"MAF",  required_argument, 0, 'm'},
+            {"DB", required_argument,0,'d'},
+            {"HAL",  required_argument, 0, 'h'},
+            {0, 0, 0}
         };
         int option_index = 0;
-        c = getopt_long(argc, argv, "n:c:p:v",
+        c = getopt_long(argc, argv, "m:d:h:",
                         long_options, &option_index);
         if (c == -1) {
             break;
         }
         switch (c) {
-        case 0:l
+        case 0:
             break;
-        case 's':
-            setSName = 1;
-            sscanf(optarg, "%s", seqName);
+        case 'm':
+            setMAFpath = 1;
+            MAFFilePath=optarg;
+            //sscanf(optarg, "%s", MAFFilePath);
             break;
-        case 'p':
-            setPos = 1;
-            tempPos = strtoll(optarg, NULL, 10);
-            if (tempPos < 0) {
-                fprintf(stderr, "Error, --pos %d must be nonnegative.\n", tempPos);
-
-            }
-            *position = tempPos;
-            break;
-        case 'v':
-            verbose_flag++;
-            break;
+        case 'd':
+        	setDBPath = 1;
+        	DBPath=optarg;
+        	//sscanf(optarg, "%s", DBPath);
+        	break;
         case 'h':
+        	setHALPath = 1;
+        	HALAlignmentPath=optarg;
+            //sscanf(optarg, "%s", HALAlignmentPath);
+            break;
         case '?':
             break;
         default:
             abort();
         }
     }
-    if (!(setSName && setPos)) {
-        fprintf(stderr, "specify --seq --position\n");
+    if (!(setMAFpath && setDBPath&& setHALPath)) {
+        cerr << "specify --MAF --DB --HAL\n";
     }
     // Check there's nothing left over on the command line
     if (optind < argc) {
-        char errorString[30] = "Unexpected arguments:";
+        std::string errorString= "Unexpected arguments:";
         while (optind < argc) {
-            strcat(errorString, " ");
-            strcat(errorString, argv[optind++]);
+            errorString.append(" ");
+            errorString.append(argv[optind++]);
         }
-        fprintf(stderr, "%s\n", errorString);
+        cerr<<errorString;
     }
 }
 
