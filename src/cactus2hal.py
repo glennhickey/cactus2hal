@@ -26,8 +26,8 @@ class CommandLine(object) :
         
         self.parser = argparse.ArgumentParser(description = 'Extracts path information for all files \
                                                that need to be converted to the HAL format and initiates\
-                                               their conversion. The input path information is int he form \
-                                               of an xml file. ', 
+                                               their conversion. The input path information comes as an \
+                                               xml file. ', 
                                              add_help = True, #default is True 
                                              prefix_chars = '-')
         self.parser.add_argument('xml_list', type=argparse.FileType('r'), action = 'store', 
@@ -51,19 +51,26 @@ def main():
         experimentFileXML = ET.parse(experimentFilePath).getroot()
         experimentObject = ExperimentWrapper(experimentFileXML)
         # naming is a bit out of date.
-        halFilePath = experimentObject.getMAFPath()
+        HALIntermFilePath = experimentObject.getMAFPath()
         # access into cactus
         dbString = experimentObject.getDiskDatabaseString()
-    
-    
+        
+        # pass them to the c parser, parse them in there
+        os.system('../bin/importCactusIlntoHAl -m {} -d {} -h{}'.format(
+                                                                   HALIntermFilePath,
+                                                                   dbString,
+                                                                   myComLine.args['HAL_file_path']))
+        
 #    testing output - will remove those when system call put in   
     print genomeName
     print experimentFilePath
     print experimentFileXML
     print experimentObject
-    print halFilePath
+    print HALIntermFilePath
     print dbString
-# pass them to the c parser, parse them in there          
+    
+    
+              
       
 if __name__ == "__main__":
     main();
