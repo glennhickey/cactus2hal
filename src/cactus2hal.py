@@ -51,13 +51,13 @@ def main():
         experimentFileXML = ET.parse(experimentFilePath).getroot()
         experimentObject = ExperimentWrapper(experimentFileXML)
         # naming is a bit out of date.
-        HALIntermFilePath = experimentObject.getMAFPath()
+        HALSegmentFilePath = experimentObject.getMAFPath()
         # access into cactus
         dbString = experimentObject.getDiskDatabaseString()
         
         # pass them to the c parser, parse them in there
         os.system('../bin/importCactusIlntoHAl -m {} -d {} -h{}'.format(
-                                                                   HALIntermFilePath,
+                                                                   HALSegmentFilePath,
                                                                    dbString,
                                                                    myComLine.args['HAL_file_path']))
         
@@ -66,7 +66,7 @@ def main():
     print experimentFilePath
     print experimentFileXML
     print experimentObject
-    print HALIntermFilePath
+    print HALSegmentFilePath
     print dbString
     
     

@@ -86,37 +86,59 @@ void parseOptions(int argc, char **argv, string &HALSegmentsPath,
 
 Cactus2HALparser::Cactus2HALparser(std::string& HALAlignFilePath){
 	theAlignment=hdf5AlignmentInstance();
-	if(!fileExists(HALAlignFilePath)){
-			theAlignment->createNew(HALAlignFilePath);
-		}
-		else{
-			theAlignment->open(HALAlignFilePath,false);
-		}
+	open(HALAlignFilePath);
 }
 
 Cactus2HALparser::Cactus2HALparser(std::string& HALAlignFilePath,hal::AlignmentPtr alignmentType){
 	theAlignment=alignmentType;
-	if(!fileExists(HALAlignFilePath)){
-				theAlignment->createNew(HALAlignFilePath);
-			}
-			else{
-				theAlignment->open(HALAlignFilePath,false);
-			}
+	open(HALAlignFilePath);
 }
 
 Cactus2HALparser::~Cactus2HALparser(){
+	close();
+}
+
+hal::GenomePtr convertToHALGenome(CactusDbWrapper* GenomeSeq,std::string* HALSegments){
+
+}
+
+//convertToHALGenome will uses getGenomeSize to find length first
+void updateHALAlignment(hal::GenomePtr newGenome){
+
+	}
+
+hal_size_t* getGenomeSize(CactusDbWrapper* GenomeSeq){
+
+}
+
+void Cactus2HALparser::open(std::string& HALAlignFilePath){
+	if(!fileExists(HALAlignFilePath)){
+		theAlignment->createNew(HALAlignFilePath);
+	}
+	else{
+		theAlignment->open(HALAlignFilePath,false);
+	}
+}
+
+
+void Cactus2HALparser::close(){
 	theAlignment->close();
-	theAlignment=NULL;
 }
 
 int main(int argc, char *argv[]){
 
-	//create a cactus db wrapper object and a cactustoHalParser object
-	// do parse options on them
-	//use them to add genomes
-	string PreHALFilePath,PreHalSeqDB,HALAlignFilePath;
+	string HALSegmentsFilePath,SequenceDB,HALAlignFilePath;
+	hal::GenomePtr genometoAdd;
 
-	parseOptions(argc, argv,  PreHALFilePath, PreHalSeqDB,HALAlignFilePath);
+	parseOptions(argc, argv,  HALSegmentsFilePath, SequenceDB,HALAlignFilePath);
+
+	CactusDbWrapper *currSeq= new CactusDbWrapper(SequenceDB);
+	Cactus2HALparser myParser=Cactus2HALparser(HALAlignFilePath);
+	genometoAdd=myParser.convertToHALGenome(currSeq,&HALAlignFilePath);
+	myParser.updateHALAlignment(genometoAdd);
+	myParser.close();
+	currSeq->close();
+	//what do I need to do for all other objects?
 
 
 
