@@ -8,27 +8,60 @@
 #ifndef CACTUS2HALPARSER_H_
 #define CACTUS2HALPARSER_H_
 
+#include <deque>
 #include "hal.h"
 #include "cactusDbWrapper.h"
 
 class Cactus2HALparser{
 
 public:
-	Cactus2HALparser(std::string& HALAlignFilePath);
-	Cactus2HALparser(std::string& HALAlignFilePath,hal::AlignmentPtr HALfile);
+
+	typedef struct {
+			string genomeName;
+			bool isBottom;
+			hal::Sequence::Info seqInfo;
+		}SegmentCounters;
+
+		typedef struct{
+				hal_size_t segmentID;
+				hal_size_t startPos;
+				hal_size_t length;
+			}topSegmentInfo;
+
+		typedef struct{
+			bool isInsertion;
+			hal_size_t startPos;
+			hal_size_t length;
+			hal_size_t segmentID;
+			hal_size_t orientation;
+
+		}bottomSegmentInfo;
+
+		typedef struct {
+			bool isBottom;
+			map<hal_size_t,topSegmentInfo> topSegmentList;
+			map<hal_size_t,bottomSegmentInfo>bottomSegmentList;
+		}SegmentInfoList;
+
+
+	Cactus2HALparser();
+	Cactus2HALparser(hal::AlignmentPtr HALfile);
 	~Cactus2HALparser();
 
-	hal::GenomePtr convertToHALGenome(CactusDbWrapper* GenomeSeq,
-			std::string* HALSegments);
-	//convertToHALGenome will uses getGenomeSize to find length first
-	void updateHALAlignment(hal::GenomePtr newGenome);
-	hal_size_t* getGenomeSize(CactusDbWrapper* GenomeSeq);//maybe use last entry in the segment list?
-	//method for differentiating root from leaf genome?
-	void open(std::string& HALAlignFilePath);
+	deque<hal::GenomePtr>* convertToHALGenome(CactusDbWrapper* GenomeSeq,
+			std::string* HALSegmentsFilePath);
+
+	void updateHALAlignment(deque<hal::GenomePtr>* newGenomes);
+	deque<SegmentCounters>* getSegmentsInfo(string* HALSegmentsFilePath,CactusDbWrapper* GenomeSeq);
+
+	void open(string& HALAlignFilePath);
 	void close();
 
 protected:
-	hal::AlignmentPtr  theAlignment;
+	hal::AlignmentPtr theAlignment;
+
+
+
 
 };
 

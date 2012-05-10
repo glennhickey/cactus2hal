@@ -8,6 +8,7 @@
  */
 
 #include <iostream>
+#include <fstream>
 #include <sstream>
 #include <string>
 #include <getopt.h>
@@ -84,31 +85,57 @@ void parseOptions(int argc, char **argv, string &HALSegmentsPath,
     }
 }
 
-Cactus2HALparser::Cactus2HALparser(std::string& HALAlignFilePath){
+Cactus2HALparser::Cactus2HALparser(){
 	theAlignment=hdf5AlignmentInstance();
-	open(HALAlignFilePath);
 }
 
-Cactus2HALparser::Cactus2HALparser(std::string& HALAlignFilePath,hal::AlignmentPtr alignmentType){
+Cactus2HALparser::Cactus2HALparser(hal::AlignmentPtr alignmentType){
 	theAlignment=alignmentType;
-	open(HALAlignFilePath);
 }
 
 Cactus2HALparser::~Cactus2HALparser(){
 	close();
 }
 
-hal::GenomePtr convertToHALGenome(CactusDbWrapper* GenomeSeq,std::string* HALSegments){
+deque<hal::GenomePtr>* convertToHALGenome(CactusDbWrapper* GenomeSeq,std::string* HALSegmentsFilePath){
+		//use get genomeInfo to get segments info
+		//iterate over collection, extract only ones from same genome,make those into  a hal genome, repeat
+	// those two should be another method - initialize Genome
+
+
+		//still need to iterate over file again and add actual sequences;-after genome initialization
 
 }
 
-//convertToHALGenome will uses getGenomeSize to find length first
-void updateHALAlignment(hal::GenomePtr newGenome){
+
+void updateHALAlignment(deque<hal::GenomePtr>* newGenomes){
 
 	}
 
-hal_size_t* getGenomeSize(CactusDbWrapper* GenomeSeq){
+deque<Cactus2HALparser::SegmentCounters>* getSegmentsInfo(std::string* HALSegmentsFilePath,CactusDbWrapper* GenomeSeq){
 
+	ifstream InFile(*HALSegmentsFilePath,ifstream::in);
+	istringstream tokenizer;
+	std::string aLine,start;
+	char headerLine='c',sequenceLine='a';
+	deque<Cactus2HALparser::SegmentCounters>* GenomeInfo=new deque<Cactus2HALparser::SegmentCounters>();
+
+	getline(InFile,aLine,'\n');
+	while(!InFile.eof()){
+
+		if(aLine[0]==headerLine){
+			tokenizer.str(aLine);
+			Cactus2HALparser::SegmentCounters currSegmentCounter= Cactus2HALparser::SegmentCounters();
+			tokenizer>>start>>currSegmentCounter.genomeName>>currSegmentCounter.seqInfo._name>>currSegmentCounter.isBottom;
+
+			//get number of lines until next s starting line
+
+		}
+		else{
+			//throw some ghastly exception
+		}
+	}
+	return GenomeInfo;
 }
 
 void Cactus2HALparser::open(std::string& HALAlignFilePath){
@@ -128,19 +155,19 @@ void Cactus2HALparser::close(){
 int main(int argc, char *argv[]){
 
 	string HALSegmentsFilePath,SequenceDB,HALAlignFilePath;
-	hal::GenomePtr genometoAdd;
-
+	deque<hal::GenomePtr>* genomestoAdd;
 	parseOptions(argc, argv,  HALSegmentsFilePath, SequenceDB,HALAlignFilePath);
 
-	CactusDbWrapper *currSeq= new CactusDbWrapper(SequenceDB);
-	Cactus2HALparser myParser=Cactus2HALparser(HALAlignFilePath);
-	genometoAdd=myParser.convertToHALGenome(currSeq,&HALAlignFilePath);
-	myParser.updateHALAlignment(genometoAdd);
-	myParser.close();
-	currSeq->close();
-	//what do I need to do for all other objects?
+	CactusDbWrapper *currSeqs= new CactusDbWrapper(SequenceDB);
+	Cactus2HALparser myParser=Cactus2HALparser();
+	myParser.open(HALAlignFilePath);
 
+	//ToDO:should I care about parent-child information  - the HALGenome header seems to do so??
+	genomestoAdd=myParser.convertToHALGenome(currSeqs,&HALAlignFilePath);
+	myParser.updateHALAlignment(genomestoAdd);
 
+	currSeqs->close();
+	//do I need to release the genomesToAdd vector??
 
 }
 
