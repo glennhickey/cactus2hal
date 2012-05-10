@@ -21,7 +21,7 @@ extern "C" {
 #include "cactusHalSequence.h"
 
 /**
- * base class for scanning through a .hal file as output by cactus.  
+ * abstract base class for scanning through a .hal file as output by cactus.  
  */
 class CactusHalScanner
 {
@@ -34,9 +34,9 @@ public:
 
 protected:
 
-   virtual void scanSequence(CactusHalSequence& sequence);
-   virtual void scanTopSegment(CactusHalTopSegment& topSegment);
-   virtual void scanBottomSegment(CactusHalBottomSegment& botSegment);
+   virtual void scanSequence(CactusHalSequence& sequence) = 0;
+   virtual void scanTopSegment(CactusHalTopSegment& topSegment) = 0;
+   virtual void scanBottomSegment(CactusHalBottomSegment& botSegment) = 0;
 
 protected:
 

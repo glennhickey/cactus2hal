@@ -96,6 +96,36 @@ char* CactusDbWrapper::getSequence(const string& eventName,
   return seqString;
 }
 
+size_t CactusDbWrapper::getSequenceLength(const string& eventName,
+                                          const string& sequenceName)
+{
+  assert(_etree != NULL);
+
+  Event* event = eventTree_getEventByHeader(_etree, eventName.c_str());
+  Name eventId = event_getName(event);
+  
+  // todo: ask Ben if there's a faster way
+  Flower_SequenceIterator* fit = flower_getSequenceIterator(_flower);
+  size_t seqLength = 0;
+  Sequence* seq = NULL;
+  while ((seq = flower_getNextSequence(fit)) != NULL)
+  {
+    Event* seqEvent = sequence_getEvent(seq);
+    Name seqEventId = event_getName(seqEvent);
+    const char* seqName = sequence_getHeader(seq);
+    if (seqEventId == eventId && sequenceName == string(seqName))
+    {
+      // todo: verify parameters
+      seqLength = sequence_getLength(seq);
+      break;
+    }
+  }
+
+  flower_destructSequenceIterator(fit);
+
+  return seqLength;
+}
+
 // DEBUGGING 
 void CactusDbWrapper::printSequenceNames()
 {

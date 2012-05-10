@@ -29,6 +29,9 @@ public:
    char* getSequence(const std::string& eventName,
                      const std::string& sequenceName);
 
+   size_t getSequenceLength(const std::string& eventName,
+                            const std::string& sequenceName);
+
    // debugging function
    void printSequenceNames();
 

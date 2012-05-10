@@ -71,19 +71,4 @@ void CactusHalScanner::scan(const std::string& halFilePath)
 }
 
 
-void CactusHalScanner::scanSequence(CactusHalSequence& sequence)
-{
-  
-}
-
-void CactusHalScanner::scanTopSegment(CactusHalTopSegment& topSegment)
-{
-
-}
-  
-void CactusHalScanner::scanBottomSegment(CactusHalBottomSegment& botSegment)
-{
-
-}
-
 
