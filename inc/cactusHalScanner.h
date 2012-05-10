@@ -28,7 +28,7 @@ class CactusHalScanner
 public:
    
    CactusHalScanner();
-   ~CactusHalScanner();
+   virtual ~CactusHalScanner();
 
    void scan(const std::string& halFilePath);
 
