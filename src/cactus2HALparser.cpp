@@ -24,7 +24,7 @@
 using namespace std;
 using namespace hal;
 
-
+#ifdef __COMMENT_OUT_DOES_NOT_COMPILE___
 void parseOptions(int argc, char **argv, string &HALSegmentsPath,
 		string &SequenceDBPath,string &HALAlignmentPath) {
     int c;
@@ -172,3 +172,4 @@ int main(int argc, char *argv[]){
 }
 
 
+#endif
