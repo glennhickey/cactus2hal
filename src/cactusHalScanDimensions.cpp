@@ -27,6 +27,13 @@ CactusHalScanDimensions::~CactusHalScanDimensions()
   }
 }
 
+const vector<hal::Sequence::Info>* CactusHalScanDimensions::getDimensinos(
+  const string& genomeName) const
+{
+  GenMapType::const_iterator i = _genomeMap.find(genomeName);
+  return i == _genomeMap.end() ? NULL : i->second; 
+}
+
 void CactusHalScanDimensions::scanDimensions(const string& halFilePath,
                                              const string& cactusDbString)
 {
