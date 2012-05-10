@@ -12,5 +12,6 @@ extern "C" {
 }
 
 CuSuite *importCactusIntoHalSuite();
+CuSuite *cactusHalScannerTestSuite();
 
 #endif
