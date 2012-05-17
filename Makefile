@@ -23,10 +23,10 @@ ${libPath}/cactus2halLib.a : ${libSources} ${libHeaders} ${basicLibsDependencies
 	mv cactus2halLib.a ${libPath}/
 
 ${binPath}/importCactusIntoHal : ${libPath}/cactus2halLib.a src/importCactusIntoHal.cpp
-	${cpp} ${cppflags} -I inc -I src -o ${binPath}/importCactusIntoHal ${libPath}/cactus2halLib.a src/importCactusIntoHal.cpp ${basicLibs} 
+	${cpp} ${cppflags} -I inc -I src -o ${binPath}/importCactusIntoHal src/importCactusIntoHal.cpp ${libPath}/cactus2halLib.a ${basicLibs} 
 
 ${binPath}/importCactusTests :  ${libPath}/cactus2halLib.a ${libTests} ${libTestsHeaders} 
-	${cpp} ${cppflags} -I inc -I src -I tests -o ${binPath}/importCactusTests ${libPath}/cactus2halLib.a ${libTests} ${basicLibs}
+	${cpp} ${cppflags} -I inc -I src -I tests -o ${binPath}/importCactusTests ${libTests} ${libPath}/cactus2halLib.a ${basicLibs}
 
 ${binPath}/cactus2hal.py : src/cactus2hal.py
 	cp src/cactus2hal.py ${binPath}/cactus2hal.py
