@@ -12,7 +12,8 @@
 #               
 ########################################################################
 
-import argparse,sys,os
+import argparse,sys,os,subprocess
+
 import xml.etree.ElementTree as ET
 from cactus.progressive.multiCactusProject import MultiCactusProject
 from cactus.progressive.multiCactusTree import MultiCactusTree
@@ -36,7 +37,12 @@ class CommandLine(object) :
                                  help="file path where newly created HAL file is to be stored.")
         self.args = vars(self.parser.parse_args())
         
-      
+
+def getOutgroups(anExperimentObject):
+    outgroup_list=anExperimentObject.getOutgroupEvents()
+    if len(outgroup_list)==0:
+        return 'None'
+    return outgroup_list[0]
 ########################################################################
 # Main
 ########################################################################
@@ -48,30 +54,21 @@ def main():
     for genomeName in myProj.expMap.keys():
 
         experimentFilePath = myProj.expMap[genomeName]
-        experimentFileXML = ET.parse(experimentFilePath).getroot()
-        experimentObject = ExperimentWrapper(experimentFileXML)
-        # naming is a bit out of date.
-        HALSegmentFilePath = experimentObject.getMAFPath()
-        # access into cactus
-        dbString = experimentObject.getDiskDatabaseString()
+        experimentObject = ExperimentWrapper(ET.parse(experimentFilePath).getroot())
+        outgroup_list=experimentObject.getOutgroupEvents()
         
-        # pass them to the c parser, parse them in there
-        os.system('../bin/importCactusIlntoHAl -m {} -d {} -h{}'.format(
-                                                                   HALSegmentFilePath,
-                                                                   dbString,
-                                                                   myComLine.args['HAL_file_path']))
+        cmdLineArgs="-s {} -d '\[{}\]' -h {}".format(experimentObject.getMAFPath(),
+                                           experimentObject.getDiskDatabaseString(),
+                                           myComLine.args['HAL_file_path'])
+        cmdLineCmd= ''.join([os.path.dirname(os.getcwd()),'/bin/importCactusIntoHAl',' '])
         
-#    testing output - will remove those when system call put in   
-    print genomeName
-    print experimentFilePath
-    print experimentFileXML
-    print experimentObject
-    print HALSegmentFilePath
-    print dbString
-    
-    
-              
-      
+        if not len(outgroup_list)==0:
+            cmdLineArgs=''.join([cmdLineArgs," -o {}".format(outgroup_list[0])])                                                           
+        
+        # pass them to the c parser
+        subprocess.call(cmdLineCmd+cmdLineArgs,shell=True)
+        
+                         
 if __name__ == "__main__":
     main();
     raise SystemExit 

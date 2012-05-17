@@ -11,11 +11,9 @@
 #include <fstream>
 #include <sstream>
 #include <string>
-#include <getopt.h>
-#include <stdarg.h>
-#include <stdlib.h>
 #include <stdio.h>
-#include <stdint.h>
+#include <stdlib.h>
+#include <getopt.h>
 #include <string.h>
 
 #include "utils.h"
@@ -24,55 +22,57 @@
 using namespace std;
 using namespace hal;
 
-#ifdef __COMMENT_OUT_DOES_NOT_COMPILE___
+#ifdef __COMMENT_OUT_DOES_NOT_COMPILE_
 void parseOptions(int argc, char **argv, string &HALSegmentsPath,
-		string &SequenceDBPath,string &HALAlignmentPath) {
-    int c;
-    int setHALSegmentsPath = 0, setDBPath = 0, setHALPath=0;
-
+		string &SequenceDBPath,string &HALAlignmentPath,string &OutgroupName) {
+    int opt;
+    int setHALSegmentsPath = 0, setDBPath = 0, setHALPath=0,setOutgroup=0;
+    static struct option long_options[] = {
+                {"segments",1, 0, 's'},
+                {"sequence",1,0,'d'},
+                {"HAL",1, 0, 'h'},
+                {"outgroup",2, 0, 'o'},
+                {0,0,0,0}	};
 
     while (1) {
-        static struct option long_options[] = {
-            //{"debug", no_argument, &debug_flag, 1},
-            //{"verbose", no_argument, 0, 'v'},
-            //{"help", no_argument, 0, 'h'},
-            {"segments",  required_argument, 0, 's'},
-            {"DB", required_argument,0,'d'},
-            {"HAL",  required_argument, 0, 'h'},
-            {0, 0, 0}
-        };
         int option_index = 0;
-        c = getopt_long(argc, argv, "p:d:h:",
+        opt = getopt_long(argc, argv, "p:d:h:o::",
                         long_options, &option_index);
-        if (c == -1) {
-            break;
-        }
-        switch (c) {
+        if (opt == -1) { break; }
+        switch (opt) {
         case 0:
             break;
         case 's':
             setHALSegmentsPath = 1;
             HALSegmentsPath=optarg;
-
+            cout<<HALSegmentsPath<<"\n";
             break;
         case 'd':
         	setDBPath = 1;
         	SequenceDBPath=optarg;
-
+        	cout<<SequenceDBPath<<"\n";
         	break;
         case 'h':
         	setHALPath = 1;
         	HALAlignmentPath=optarg;
-
+        	cout<<HALAlignmentPath<<"\n";
             break;
+        case 'o':
+        	setOutgroup=1;
+        	OutgroupName=optarg;
+        	cout<<OutgroupName<<"\n";
+        	break;
         case '?':
             break;
-        default:
-            abort();
         }
     }
+
+    if (setOutgroup==0) {
+    	OutgroupName="none";
+    	cout<<OutgroupName<<"\n";
+    }
     if (!(setHALSegmentsPath && setDBPath&& setHALPath)) {
-        cerr << "specify --segments --DB --HAL\n";
+        cerr << "specify --segments --sequence --HAL\n";
     }
     // Check there's nothing left over on the command line
     if (optind < argc) {
@@ -84,6 +84,7 @@ void parseOptions(int argc, char **argv, string &HALSegmentsPath,
         cerr<<errorString;
     }
 }
+
 
 Cactus2HALparser::Cactus2HALparser(){
 	theAlignment=hdf5AlignmentInstance();
@@ -152,11 +153,27 @@ void Cactus2HALparser::close(){
 	theAlignment->close();
 }
 
+static void usage(const char* exName)
+{
+  cout << "USAGE " << exName << " <cactus disk string>" << endl;
+}
+
+static void verifyArgs(int argc, char** argv)
+{
+  if (argc != 2)
+  {
+    usage(argv[0]);
+    throw runtime_error("Invalid arguments");
+  }
+}
+
+
+
 int main(int argc, char *argv[]){
 
-	string HALSegmentsFilePath,SequenceDB,HALAlignFilePath;
+	string HALSegmentsFilePath,SequenceDB,HALAlignFilePath,outgroup;
 	deque<hal::GenomePtr>* genomestoAdd;
-	parseOptions(argc, argv,  HALSegmentsFilePath, SequenceDB,HALAlignFilePath);
+	parseOptions(argc, argv,  HALSegmentsFilePath, SequenceDB,HALAlignFilePath,outgroup);
 
 	CactusDbWrapper *currSeqs= new CactusDbWrapper(SequenceDB);
 	Cactus2HALparser myParser=Cactus2HALparser();
@@ -170,6 +187,4 @@ int main(int argc, char *argv[]){
 	//do I need to release the genomesToAdd vector??
 
 }
-
-
 #endif

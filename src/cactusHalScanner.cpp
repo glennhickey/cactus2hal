@@ -46,6 +46,7 @@ void CactusHalScanner::scan(const std::string& halFilePath)
     {
       _halFile >> sequenceBuffer;
       isBottom = sequenceBuffer._isBottom;
+
       scanSequence(sequenceBuffer);
     }
     else if (buffer == "a")
