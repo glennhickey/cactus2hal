@@ -92,6 +92,71 @@ void CactusHalScanDimensions::scanBottomSegment(
   ++_currentInfo._numBottomSegments;
 }
 
+void CactusHalScanDimensions::loadDimensionsIntoHal(hal::AlignmentPtr newAlignment, const string& outgroupName)
+{
+	  const string* ParentName=getParentName();
+	//add the root Genome if alignment opened for the first time
+	if(newAlignment->getRootName().empty()){
+		newAlignment->addRootGenome(*ParentName);
+
+	}
+	GenMapType::const_iterator i;
+	for (i = getDimensionsMap()->begin();
+			i != getDimensionsMap()->end(); ++i)
+	{
+		//check we are not dealing with the outgroup genome
+		if(i->first.compare(outgroupName)!=0) continue;
+		else if(newAlignment->openGenome(i->first)!=NULL)
+		{
+			//entry is in the genome,updating counts
+			//ToDo:need to parse in branch lengths!! - set them to zero for now!!
+
+			bool isParent=(i->first.compare(*ParentName)==0);
+			vector<hal::Sequence::UpdateInfo>* updatedDims=ConvertHalDimensions(i->second,&isParent);
+
+			if(isParent){
+				//the parent has the bottom sequences
+				newAlignment->openGenome(i->first)->setBottomDimensions(*updatedDims);
+			}
+			else
+			{
+				//it's a child - top sequences
+				newAlignment->openGenome(i->first)->setTopDimensions(*updatedDims);
+			}
+
+
+
+		}
+		else if(newAlignment->openGenome(i->first)==NULL){
+			//entry is not in the genome, adding with parent the parent name
+			//ToDo:need to parse in branch lengths!! - set them to zero for now!!
+			newAlignment->addLeafGenome(i->first,*ParentName,0);
+			newAlignment->openGenome(i->first)->setDimensions(*i->second);
+		}
+
+	}//for loop
+
+}
+
+vector<hal::Sequence::UpdateInfo>* CactusHalScanDimensions::ConvertHalDimensions(vector<hal::Sequence::Info>* DimsToFormat,bool* isParent)
+{
+
+		vector<hal::Sequence::UpdateInfo>* FormattedDims= new vector<hal::Sequence::UpdateInfo>();
+		vector<hal::Sequence::Info>::const_iterator i;
+		for (i=DimsToFormat->begin();i!=DimsToFormat->end();++i)
+		{
+			if(*isParent){
+				FormattedDims->push_back(hal::Sequence::UpdateInfo(i->_name,i->_numBottomSegments));
+			}
+			else
+			{
+				FormattedDims->push_back(hal::Sequence::UpdateInfo(i->_name,i->_numTopSegments));
+			}
+		}
+
+		return FormattedDims;
+}
+
 void CactusHalScanDimensions::resetCurrent()
 {
   _currentGenome.clear();

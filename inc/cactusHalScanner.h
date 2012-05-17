@@ -32,6 +32,7 @@ public:
 
    void scan(const std::string& halFilePath);
 
+
 protected:
 
    virtual void scanSequence(CactusHalSequence& sequence) = 0;
