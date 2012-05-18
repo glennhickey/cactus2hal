@@ -57,17 +57,17 @@ def main():
         experimentObject = ExperimentWrapper(ET.parse(experimentFilePath).getroot())
         outgroup_list=experimentObject.getOutgroupEvents()
         
-        cmdLine="importCactusIntoHAl -s {} -d '{}' -h {}".format(experimentObject.getMAFPath(),
+        cmdLineArgs="-s {} -d '{}' -h {}".format(experimentObject.getMAFPath(),
                                            experimentObject.getDiskDatabaseString(),
                                            myComLine.args['HAL_file_path'])
-        
+        cmdLineCmd= ''.join(['importCactusIntoHAl',' '])
         
         if not len(outgroup_list)==0:
-            cmdLineArgs=''.join([cmdLine," -o {}".format(outgroup_list[0])])                                                           
+            cmdLineArgs=''.join([cmdLineArgs," -o {}".format(outgroup_list[0])])                                                           
         
         
         # pass them to the c parser
-        subprocess.call(cmdLine,shell=True)
+        subprocess.call(cmdLineCmd+cmdLineArgs,shell=True)
         
                          
 if __name__ == "__main__":
