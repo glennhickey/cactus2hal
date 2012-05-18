@@ -94,9 +94,9 @@ void parseOptions(int argc, char **argv, string &HALSegmentsPath,
 
 int main(int argc, char** argv)
 {
-	string HALSegmentsFilePath,SequenceDB,HALAlignFilePath,outgroup;
+	string HALSegmentsFilePath,SequenceDB,HALAlignFilePath,Outgroup;
 	hal::AlignmentPtr theNewAlignment=hdf5AlignmentInstance();
-	parseOptions(argc, argv,  HALSegmentsFilePath, SequenceDB,HALAlignFilePath,outgroup);
+	parseOptions(argc, argv,  HALSegmentsFilePath, SequenceDB,HALAlignFilePath,Outgroup);
 
 	if(!fileExists(HALAlignFilePath)){
 			theNewAlignment->createNew(HALAlignFilePath);
@@ -107,6 +107,6 @@ int main(int argc, char** argv)
 
 	CactusHalScanDimensions DimensionsScanner;
 	DimensionsScanner.scanDimensions(HALSegmentsFilePath,SequenceDB);
-	DimensionsScanner.loadDimensionsIntoHal(theNewAlignment,outgroup);
+	DimensionsScanner.loadDimensionsIntoHal(theNewAlignment,Outgroup);
 	theNewAlignment->close();
 }

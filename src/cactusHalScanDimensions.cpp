@@ -112,7 +112,7 @@ void CactusHalScanDimensions::loadDimensionsIntoHal(hal::AlignmentPtr newAlignme
 			//ToDo:need to parse in branch lengths!! - set them to zero for now!!
 
 			bool isParent=(i->first.compare(*ParentName)==0);
-			vector<hal::Sequence::UpdateInfo>* updatedDims=ConvertHalDimensions(i->second,&isParent);
+			vector<hal::Sequence::UpdateInfo>* updatedDims=convertHalDimensions(i->second,&isParent);
 
 			if(isParent){
 				//the parent has the bottom sequences
@@ -138,7 +138,7 @@ void CactusHalScanDimensions::loadDimensionsIntoHal(hal::AlignmentPtr newAlignme
 
 }
 
-vector<hal::Sequence::UpdateInfo>* CactusHalScanDimensions::ConvertHalDimensions(vector<hal::Sequence::Info>* DimsToFormat,bool* isParent)
+vector<hal::Sequence::UpdateInfo>* CactusHalScanDimensions::convertHalDimensions(vector<hal::Sequence::Info>* DimsToFormat,bool* isParent)
 {
 
 		vector<hal::Sequence::UpdateInfo>* FormattedDims= new vector<hal::Sequence::UpdateInfo>();

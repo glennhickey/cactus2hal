@@ -65,6 +65,7 @@ def main():
         if not len(outgroup_list)==0:
             cmdLineArgs=''.join([cmdLineArgs," -o {}".format(outgroup_list[0])])                                                           
         
+        
         # pass them to the c parser
         subprocess.call(cmdLineCmd+cmdLineArgs,shell=True)
         
