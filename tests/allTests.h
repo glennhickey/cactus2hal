@@ -11,7 +11,7 @@ extern "C" {
 #include "CuTest.h"
 }
 
-CuSuite *importCactusIntoHalSuite();
+CuSuite *CactusHalScanDimensionsTestSuite();
 CuSuite *cactusHalScannerTestSuite();
 
 #endif

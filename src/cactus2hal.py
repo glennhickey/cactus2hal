@@ -52,7 +52,7 @@ def main():
     myProj.readXML(myComLine.args['xml_list'])
     
     for genomeName in myProj.expMap.keys():
-
+        print genomeName
         experimentFilePath = myProj.expMap[genomeName]
         experimentObject = ExperimentWrapper(ET.parse(experimentFilePath).getroot())
         outgroup_list=experimentObject.getOutgroupEvents()

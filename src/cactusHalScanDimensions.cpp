@@ -96,16 +96,20 @@ void CactusHalScanDimensions::loadDimensionsIntoHal(hal::AlignmentPtr newAlignme
 {
 	  const string* ParentName=getParentName();
 	//add the root Genome if alignment opened for the first time
-	if(newAlignment->getRootName().empty()){
+	if(newAlignment->getNumGenomes()==0)
+	{
 		newAlignment->addRootGenome(*ParentName);
-
+		newAlignment->openGenome(*ParentName)->setDimensions((*_genomeMap[*ParentName]));
 	}
+
 	GenMapType::const_iterator i;
 	for (i = getDimensionsMap()->begin();
 			i != getDimensionsMap()->end(); ++i)
 	{
+
 		//check we are not dealing with the outgroup genome
-		if(i->first.compare(outgroupName)!=0) continue;
+		if(i->first.compare(outgroupName)==0)
+		{}//do nothing
 		else if(newAlignment->openGenome(i->first)!=NULL)
 		{
 			//entry is in the genome,updating counts
@@ -138,23 +142,23 @@ void CactusHalScanDimensions::loadDimensionsIntoHal(hal::AlignmentPtr newAlignme
 
 }
 
-vector<hal::Sequence::UpdateInfo>* CactusHalScanDimensions::convertHalDimensions(vector<hal::Sequence::Info>* DimsToFormat,bool* isParent)
+vector<hal::Sequence::UpdateInfo>* CactusHalScanDimensions::convertHalDimensions(vector<hal::Sequence::Info>* dimsToFormat,bool* isParent)
 {
 
-		vector<hal::Sequence::UpdateInfo>* FormattedDims= new vector<hal::Sequence::UpdateInfo>();
+		vector<hal::Sequence::UpdateInfo>* formattedDims= new vector<hal::Sequence::UpdateInfo>();
 		vector<hal::Sequence::Info>::const_iterator i;
-		for (i=DimsToFormat->begin();i!=DimsToFormat->end();++i)
+		for (i=dimsToFormat->begin();i!=dimsToFormat->end();++i)
 		{
 			if(*isParent){
-				FormattedDims->push_back(hal::Sequence::UpdateInfo(i->_name,i->_numBottomSegments));
+				formattedDims->push_back(hal::Sequence::UpdateInfo(i->_name,i->_numBottomSegments));
 			}
 			else
 			{
-				FormattedDims->push_back(hal::Sequence::UpdateInfo(i->_name,i->_numTopSegments));
+				formattedDims->push_back(hal::Sequence::UpdateInfo(i->_name,i->_numTopSegments));
 			}
 		}
 
-		return FormattedDims;
+		return formattedDims;
 }
 
 void CactusHalScanDimensions::resetCurrent()

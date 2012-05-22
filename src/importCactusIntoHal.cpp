@@ -94,6 +94,7 @@ void parseOptions(int argc, char **argv, string &HALSegmentsPath,
 
 int main(int argc, char** argv)
 {
+
 	string HALSegmentsFilePath,SequenceDB,HALAlignFilePath,Outgroup;
 	hal::AlignmentPtr theNewAlignment=hdf5AlignmentInstance();
 	parseOptions(argc, argv,  HALSegmentsFilePath, SequenceDB,HALAlignFilePath,Outgroup);

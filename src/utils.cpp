@@ -7,6 +7,7 @@
  */
 #include <sys/stat.h>
 #include <string>
+#include <iostream>
 //copied from a stack overflow answer
 // Function: fileExists
 /**
@@ -19,12 +20,15 @@
 bool fileExists(const std::string& filename)
 {
     struct stat buf;
-    if (stat(filename.c_str(), &buf) != -1)
+
+    if (stat(filename.c_str(), &buf) !=-1)
     {
         return true;
     }
     return false;
 }
+
+
 
 
 
