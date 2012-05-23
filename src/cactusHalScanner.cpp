@@ -67,7 +67,8 @@ void CactusHalScanner::scan(const std::string& halFilePath)
       throw runtime_error("expected a or s token, got " + buffer);
     }
   }
-  
+
+  scanEndOfFile();  
   _halFile.close();
 }
 

@@ -38,6 +38,7 @@ protected:
    virtual void scanSequence(CactusHalSequence& sequence) = 0;
    virtual void scanTopSegment(CactusHalTopSegment& topSegment) = 0;
    virtual void scanBottomSegment(CactusHalBottomSegment& botSegment) = 0;
+   virtual void scanEndOfFile() = 0;
 
 protected:
 

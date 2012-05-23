@@ -37,8 +37,10 @@ protected:
    void scanSequence(CactusHalSequence& sequence);
    void scanTopSegment(CactusHalTopSegment& topSegment);
    void scanBottomSegment(CactusHalBottomSegment& botSegment);
+   void scanEndOfFile();
 
    void resetCurrent();
+   void flushCurrentIntoMap();
    
 protected:
 
