@@ -99,7 +99,7 @@ void CactusHalScanDimensions::loadDimensionsIntoHal(hal::AlignmentPtr newAlignme
 	if(newAlignment->getNumGenomes()==0)
 	{
 		newAlignment->addRootGenome(*ParentName);
-		newAlignment->openGenome(*ParentName)->setDimensions((*_genomeMap[*ParentName]));
+		//newAlignment->openGenome(*ParentName)->setDimensions((*_genomeMap[*ParentName]));
 	}
 
 	GenMapType::const_iterator i;
