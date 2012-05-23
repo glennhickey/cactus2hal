@@ -55,26 +55,11 @@ void CactusHalScanDimensions::scanDimensions(const string& halFilePath,
 
 void CactusHalScanDimensions::scanSequence(CactusHalSequence& sequence)
 {
-	if (sequence._isBottom==true){
-		_ParentGenome=sequence._event;
-	}
-  if (_currentGenome.empty() == false)
+  if (sequence._isBottom==true)
   {
-    GenMapType::iterator i = _genomeMap.find(_currentGenome);
-    if (i != _genomeMap.end())
-    {
-      assert(i->second != NULL);
-      i->second->push_back(_currentInfo);
-    }
-    else
-    {
-      vector<hal::Sequence::Info>* infoVec = new  vector<hal::Sequence::Info>();
-      infoVec->push_back(_currentInfo);
-      _genomeMap.insert(pair<string, vector<hal::Sequence::Info>*>(
-                          _currentGenome, infoVec));
-    }
+    _ParentGenome=sequence._event;
   }
-  resetCurrent();
+  flushCurrentIntoMap();
   _currentGenome = sequence._event;
   _currentInfo._name = sequence._name;
   _currentInfo._length = _cactusDb.getSequenceLength(_currentGenome,
@@ -90,6 +75,11 @@ void CactusHalScanDimensions::scanBottomSegment(
   CactusHalBottomSegment& botSegment)
 {
   ++_currentInfo._numBottomSegments;
+}
+
+void CactusHalScanDimensions::scanEndOfFile()
+{
+  flushCurrentIntoMap();
 }
 
 void CactusHalScanDimensions::loadDimensionsIntoHal(hal::AlignmentPtr newAlignment, const string& outgroupName)
@@ -168,4 +158,25 @@ void CactusHalScanDimensions::resetCurrent()
   _currentInfo._length = 0;
   _currentInfo._numTopSegments = 0;
   _currentInfo._numBottomSegments = 0;
+}
+
+void CactusHalScanDimensions::flushCurrentIntoMap()
+{
+  if (_currentGenome.empty() == false)
+  {
+    GenMapType::iterator i = _genomeMap.find(_currentGenome);
+    if (i != _genomeMap.end())
+    {
+      assert(i->second != NULL);
+      i->second->push_back(_currentInfo);
+    }
+    else
+    {
+      vector<hal::Sequence::Info>* infoVec = new  vector<hal::Sequence::Info>();
+      infoVec->push_back(_currentInfo);
+      _genomeMap.insert(pair<string, vector<hal::Sequence::Info>*>(
+                          _currentGenome, infoVec));
+    }
+  }
+  resetCurrent();
 }

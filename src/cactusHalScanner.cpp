@@ -69,6 +69,7 @@ void CactusHalScanner::scan(const std::string& halFilePath)
   }
   
   _halFile.close();
+  scanEndOfFile();
 }
 
 
