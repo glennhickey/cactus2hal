@@ -88,8 +88,10 @@ void CactusHalScanDimensions::loadDimensionsIntoHal(hal::AlignmentPtr newAlignme
 	//add the root Genome if alignment opened for the first time
 	if(newAlignment->getNumGenomes()==0)
 	{
+		cout << "ADDING ROOT " << *ParentName << endl;
+
 		newAlignment->addRootGenome(*ParentName);
-		//newAlignment->openGenome(*ParentName)->setDimensions((*_genomeMap[*ParentName]));
+		newAlignment->openGenome(*ParentName)->setDimensions((*_genomeMap[*ParentName]));
 	}
 
 	GenMapType::const_iterator i;
@@ -124,7 +126,8 @@ void CactusHalScanDimensions::loadDimensionsIntoHal(hal::AlignmentPtr newAlignme
 		else if(newAlignment->openGenome(i->first)==NULL){
 			//entry is not in the genome, adding with parent the parent name
 			//ToDo:need to parse in branch lengths!! - set them to zero for now!!
-			newAlignment->addLeafGenome(i->first,*ParentName,0);
+			cout << "ADDING LEAF " << i->first << " TO PARENT " << *ParentName << endl;
+			newAlignment->addLeafGenome(i->first,*ParentName,0.1);
 			newAlignment->openGenome(i->first)->setDimensions(*i->second);
 		}
 

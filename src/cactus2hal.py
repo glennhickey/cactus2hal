@@ -18,7 +18,7 @@ import xml.etree.ElementTree as ET
 from cactus.progressive.multiCactusProject import MultiCactusProject
 from cactus.progressive.multiCactusTree import MultiCactusTree
 from cactus.progressive.experimentWrapper import ExperimentWrapper
-
+from sonLib.bioio import system
 
 class CommandLine(object) :
     
@@ -52,7 +52,7 @@ def main():
     myProj.readXML(myComLine.args['xml_list'])
     
     for genomeName in myProj.expMap.keys():
-        print genomeName
+        
         experimentFilePath = myProj.expMap[genomeName]
         experimentObject = ExperimentWrapper(ET.parse(experimentFilePath).getroot())
         outgroup_list=experimentObject.getOutgroupEvents()
@@ -65,10 +65,11 @@ def main():
         if not len(outgroup_list)==0:
             cmdLineArgs=''.join([cmdLineArgs," -o {}".format(outgroup_list[0])])                                                           
         
+        print cmdLineCmd+cmdLineArgs
         
         # pass them to the c parser
-        subprocess.call(cmdLineCmd+cmdLineArgs,shell=True)
-        
+        #subprocess.call(cmdLineCmd+cmdLineArgs,shell=True)
+        system(cmdLineCmd+cmdLineArgs)
                          
 if __name__ == "__main__":
     main();

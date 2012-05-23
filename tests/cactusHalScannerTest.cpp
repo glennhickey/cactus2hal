@@ -121,6 +121,10 @@ public:
    {
      _bottomSegments.push_back(botSegment);
    }
+   void scanEndOfFile()
+   {
+
+   }
 };
 
 void cactusHalScannerSmallTest(CuTest *testCase)

@@ -95,19 +95,24 @@ void parseOptions(int argc, char **argv, string &HALSegmentsPath,
 int main(int argc, char** argv)
 {
 
-	string HALSegmentsFilePath,SequenceDB,HALAlignFilePath,Outgroup;
+	string halSegmentsFilePath,sequenceDB,hallignFilePath,outgroup;
 	hal::AlignmentPtr theNewAlignment=hdf5AlignmentInstance();
-	parseOptions(argc, argv,  HALSegmentsFilePath, SequenceDB,HALAlignFilePath,Outgroup);
+	parseOptions(argc, argv,  halSegmentsFilePath, sequenceDB,hallignFilePath,outgroup);
 
-	if(!fileExists(HALAlignFilePath)){
-			theNewAlignment->createNew(HALAlignFilePath);
+	if(!fileExists(hallignFilePath)){
+			theNewAlignment->createNew(hallignFilePath);
+			cout << "NEW " << hallignFilePath << endl;
 		}
 		else{
-			theNewAlignment->open(HALAlignFilePath,false);
+			cout << "EXISTING " << hallignFilePath << endl;
+			theNewAlignment->open(hallignFilePath,false);
 		}
 
+	cout<<theNewAlignment->getNewickTree()<<"\n";
 	CactusHalScanDimensions DimensionsScanner;
-	DimensionsScanner.scanDimensions(HALSegmentsFilePath,SequenceDB);
-	DimensionsScanner.loadDimensionsIntoHal(theNewAlignment,Outgroup);
+	DimensionsScanner.scanDimensions(halSegmentsFilePath,sequenceDB);
+	DimensionsScanner.loadDimensionsIntoHal(theNewAlignment,outgroup);
+	cout<<theNewAlignment->getNewickTree()<<"\n";
 	theNewAlignment->close();
+
 }
