@@ -38,7 +38,7 @@ void CactusHalScanner::scan(const std::string& halFilePath)
   CactusHalTopSegment tsegBuffer;
 
   bool isBottom = false;
-  while (!_halFile.eof())
+  while (!_halFile.eof() && _halFile.good())
   {
     buffer.clear();
     _halFile >> buffer;
