@@ -43,6 +43,7 @@ public:
 		return &_currentGenome;
 	}
 
+
 	void setCurrInfo(hal::Sequence::Info& testInfo){
 		_currentInfo._length=testInfo._length;
 		_currentInfo._name=testInfo._name;
@@ -52,6 +53,11 @@ public:
 
 	void executeFlush(){
 		flushCurrentIntoMap();
+	}
+
+	void executeLoadSequences(hal::AlignmentPtr theAlignment,GenMapType::const_iterator GenomeInfo)
+	{
+		loadSequencesIntoHal(theAlignment,GenomeInfo);
 	}
 };
 
@@ -207,6 +213,49 @@ void CactusHalScanDimensionsConvertHalDimensionsTest(CuTest *testCase)
 	CuAssertTrue(testCase,(*formattedDimsFalse)[1]._numSegments==30);
 }
 
+void cactusHalScanDimensionsLoadSequencesIntoHalTest(CuTest *testCase)
+{
+	CactusHalScanDimensions testScanner1,testScanner2;
+	CactusDbWrapper testDbWrapper;
+	hal::AlignmentPtr theAlignment=hdf5AlignmentInstance();
+	char* AlignmentTempFile = getTempFile();
+	std::string StrTempFile(AlignmentTempFile);
+	theAlignment->createNew(StrTempFile);
+
+
+	//first sequence - parent
+	testDbWrapper.open(DB_Path1);
+
+	char* seq=testDbWrapper.getSequence("Anc0","Anc0.0");
+	string testSeq(seq);
+	size_t len=testDbWrapper.getSequenceLength("Anc0","Anc0.0");
+	testDbWrapper.close();
+
+	testScanner1.scanDimensions(tempFilePath1,DB_Path1);
+	testScanner1.loadDimensionsIntoHal(theAlignment,"none");
+
+	string retrievedSeq;
+	theAlignment->openGenome("Anc0")->getSequence("Anc0.0")->getString(retrievedSeq);
+	CuAssertTrue(testCase,theAlignment->openGenome("Anc0")->getSequence("Anc0.0")->getSequenceLength()==len);
+	CuAssertTrue(testCase,retrievedSeq.compare(testSeq)==0);
+
+	//second sequence -child
+	testDbWrapper.open(DB_Path2);
+
+	seq=testDbWrapper.getSequence("Anc3","Anc3.0");
+	string testSeq1(seq);
+	len=testDbWrapper.getSequenceLength("Anc3","Anc3.0");
+	testDbWrapper.close();
+
+	testScanner1.scanDimensions(tempFilePath2,DB_Path2);
+	testScanner1.loadDimensionsIntoHal(theAlignment,scanner2outgroup);
+
+	theAlignment->openGenome("Anc3")->getSequence("Anc3.0")->getString(retrievedSeq);
+	CuAssertTrue(testCase,theAlignment->openGenome("Anc3")->getSequence("Anc3.0")->getSequenceLength()==len);
+	CuAssertTrue(testCase,retrievedSeq.compare(testSeq1)==0);
+
+	removeTempFile(AlignmentTempFile);
+}
 
 
 CuSuite* CactusHalScanDimensionsTestSuite(void)
@@ -219,6 +268,6 @@ CuSuite* CactusHalScanDimensionsTestSuite(void)
   SUITE_ADD_TEST(suite, cactusHalScanDimensionsParentTest);
   SUITE_ADD_TEST(suite, CactusHalScanDimensionsConvertHalDimensionsTest);
   SUITE_ADD_TEST(suite, cactusHalScanDimensionsLoadDimensionsIntoHalTest);
-
+  SUITE_ADD_TEST(suite, cactusHalScanDimensionsLoadSequencesIntoHalTest);
   return suite;
 }
