@@ -135,8 +135,9 @@ void cactusHalScanDimensionsLoadDimensionsIntoHalTest(CuTest *testCase)
 	scanner1.scanDimensions(tempFilePath1,DB_Path1);
 	scanner2.scanDimensions(tempFilePath2,DB_Path2);
 	hal::AlignmentPtr theNewAlignment=hdf5AlignmentInstance();
-	string AlignmentTempFile = getTempFile();
-	theNewAlignment->createNew(AlignmentTempFile);
+	char* AlignmentTempFile = getTempFile();
+	std::string StrTempFile(AlignmentTempFile);
+	theNewAlignment->createNew(StrTempFile);
 	scanner1.loadDimensionsIntoHal(theNewAlignment,scanner2outgroup);
 
 	//load scanner2, check again what has happened
@@ -176,6 +177,9 @@ void cactusHalScanDimensionsLoadDimensionsIntoHalTest(CuTest *testCase)
 	CuAssertTrue(testCase,theNewAlignment->openGenome("Anc3")->getNumBottomSegments()==0);
 	CuAssertTrue(testCase,theNewAlignment->openGenome("Anc3")->getNumTopSegments()==9);
 	CuAssertTrue(testCase,theNewAlignment->openGenome("Anc3")->getNumSequences()==1);
+
+
+	removeTempFile(AlignmentTempFile);
 }
 
 void CactusHalScanDimensionsConvertHalDimensionsTest(CuTest *testCase)

@@ -22,6 +22,7 @@ class CactusHalScanDimensions : protected CactusHalScanner
 {
 public:
 
+
    CactusHalScanDimensions();
    ~CactusHalScanDimensions();
 
@@ -31,6 +32,7 @@ public:
                        const std::string& cactusDbString);
    const std::string* getParentName() const;
    void loadDimensionsIntoHal(hal::AlignmentPtr newAlignment, const std::string& outgroupName);
+
    std::vector<hal::Sequence::UpdateInfo>* convertHalDimensions(std::vector<hal::Sequence::Info>* DimsToFormat,bool* isParent);
 protected:
 
@@ -41,12 +43,12 @@ protected:
 
    void resetCurrent();
    void flushCurrentIntoMap();
-   
+   void loadSequencesIntoHal(hal::AlignmentPtr theAlignment,GenMapType::const_iterator GenomeInfo);
 protected:
 
    GenMapType _genomeMap;
    CactusDbWrapper _cactusDb;
-   std::string _ParentGenome;
+   std::string _parentGenome;
 
    std::string _currentGenome;
    hal::Sequence::Info _currentInfo;

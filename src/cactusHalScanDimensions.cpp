@@ -35,7 +35,7 @@ const GenMapType* CactusHalScanDimensions::getDimensionsMap() const
 
 const string* CactusHalScanDimensions::getParentName() const
 {
-	return &_ParentGenome;
+	return &_parentGenome;
 }
 
 void CactusHalScanDimensions::scanDimensions(const string& halFilePath,
@@ -57,7 +57,7 @@ void CactusHalScanDimensions::scanSequence(CactusHalSequence& sequence)
 {
   if (sequence._isBottom==true)
   {
-    _ParentGenome=sequence._event;
+    _parentGenome=sequence._event;
   }
   flushCurrentIntoMap();
   _currentGenome = sequence._event;
@@ -88,10 +88,10 @@ void CactusHalScanDimensions::loadDimensionsIntoHal(hal::AlignmentPtr newAlignme
 	//add the root Genome if alignment opened for the first time
 	if(newAlignment->getNumGenomes()==0)
 	{
-		cout << "ADDING ROOT " << *ParentName << endl;
 
 		newAlignment->addRootGenome(*ParentName);
 		newAlignment->openGenome(*ParentName)->setDimensions((*_genomeMap[*ParentName]));
+		loadSequencesIntoHal(newAlignment,_genomeMap.find(*ParentName));
 	}
 
 	GenMapType::const_iterator i;
@@ -119,16 +119,17 @@ void CactusHalScanDimensions::loadDimensionsIntoHal(hal::AlignmentPtr newAlignme
 				//it's a child - top sequences
 				newAlignment->openGenome(i->first)->setTopDimensions(*updatedDims);
 			}
-
+			loadSequencesIntoHal(newAlignment,i);
 
 
 		}
 		else if(newAlignment->openGenome(i->first)==NULL){
 			//entry is not in the genome, adding with parent the parent name
 			//ToDo:need to parse in branch lengths!! - set them to zero for now!!
-			cout << "ADDING LEAF " << i->first << " TO PARENT " << *ParentName << endl;
+
 			newAlignment->addLeafGenome(i->first,*ParentName,0.1);
 			newAlignment->openGenome(i->first)->setDimensions(*i->second);
+			loadSequencesIntoHal(newAlignment,i);
 		}
 
 	}//for loop
@@ -152,6 +153,15 @@ vector<hal::Sequence::UpdateInfo>* CactusHalScanDimensions::convertHalDimensions
 		}
 
 		return formattedDims;
+}
+
+void CactusHalScanDimensions::loadSequencesIntoHal(hal::AlignmentPtr theAlignment,GenMapType::const_iterator GenomeInfo){
+	vector<hal::Sequence::Info>::const_iterator i;
+	for(i=GenomeInfo->second->begin();i!=GenomeInfo->second->end();++i)
+	{
+		string currSeq(_cactusDb.getSequence(GenomeInfo->first,i->_name));
+		theAlignment->openGenome(GenomeInfo->first)->setString(currSeq);
+	}
 }
 
 void CactusHalScanDimensions::resetCurrent()

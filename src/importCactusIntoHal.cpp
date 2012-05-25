@@ -101,18 +101,16 @@ int main(int argc, char** argv)
 
 	if(!fileExists(hallignFilePath)){
 			theNewAlignment->createNew(hallignFilePath);
-			cout << "NEW " << hallignFilePath << endl;
+
 		}
 		else{
-			cout << "EXISTING " << hallignFilePath << endl;
+
 			theNewAlignment->open(hallignFilePath,false);
 		}
 
-	cout<<theNewAlignment->getNewickTree()<<"\n";
 	CactusHalScanDimensions DimensionsScanner;
 	DimensionsScanner.scanDimensions(halSegmentsFilePath,sequenceDB);
 	DimensionsScanner.loadDimensionsIntoHal(theNewAlignment,outgroup);
-	cout<<theNewAlignment->getNewickTree()<<"\n";
 	theNewAlignment->close();
 
 }
