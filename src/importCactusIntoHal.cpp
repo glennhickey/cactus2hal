@@ -37,7 +37,7 @@ void parseOptions(int argc, char **argv, string &HALSegmentsPath,
                 {"segments",1, 0, 's'},
                 {"sequence",1,0,'d'},
                 {"HAL",1, 0, 'h'},
-                {"outgroup",2, 0, 'o'},
+                {"outgroup",1, 0, 'o'},
                 {0,0,0,0}	};
 
     while (1) {
@@ -73,12 +73,9 @@ void parseOptions(int argc, char **argv, string &HALSegmentsPath,
         }
     }
 
-    if (setOutgroup==0) {
-    	OutgroupName="none";
 
-    }
-    if (!(setHALSegmentsPath && setDBPath&& setHALPath)) {
-        cerr << "specify --segments --sequence --HAL\n";
+    if (!(setHALSegmentsPath && setDBPath&& setHALPath && setOutgroup)) {
+        cerr << "specify --segments --sequence --HAL --outgroup\n";
     }
     // Check there's nothing left over on the command line
     if (optind < argc) {

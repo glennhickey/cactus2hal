@@ -28,6 +28,7 @@ string tempFilePath2="/home/bozdugan/output/tmp/test_Anc1.hal";
 string DB_Path2="<st_kv_database_conf type=\"tokyo_cabinet\">"
 				"<tokyo_cabinet database_dir=\"/home/bozdugan/hal_multiple/blanchette0/Anc1/Anc1/Anc1_DB\" database_name=\"An10\" />"
 				"</st_kv_database_conf>";
+string scanner1outgroup="none";
 string scanner2outgroup="Anc7";
 
 
@@ -144,9 +145,9 @@ void cactusHalScanDimensionsLoadDimensionsIntoHalTest(CuTest *testCase)
 	char* AlignmentTempFile = getTempFile();
 	std::string StrTempFile(AlignmentTempFile);
 	theNewAlignment->createNew(StrTempFile);
-	scanner1.loadDimensionsIntoHal(theNewAlignment,scanner2outgroup);
+	scanner1.loadDimensionsIntoHal(theNewAlignment,scanner1outgroup);
 
-	//load scanner2, check again what has happened
+	//load scanner1, check again what has happened
 	CuAssertTrue(testCase,theNewAlignment->getRootName()=="Anc0");
 	CuAssertTrue(testCase,theNewAlignment->getNumGenomes()==3);
 	CuAssertTrue(testCase,theNewAlignment->getParentName("Anc1")=="Anc0");
@@ -232,7 +233,7 @@ void cactusHalScanDimensionsLoadSequencesIntoHalTest(CuTest *testCase)
 	testDbWrapper.close();
 
 	testScanner1.scanDimensions(tempFilePath1,DB_Path1);
-	testScanner1.loadDimensionsIntoHal(theAlignment,"none");
+	testScanner1.loadDimensionsIntoHal(theAlignment,scanner1outgroup);
 
 	string retrievedSeq;
 	theAlignment->openGenome("Anc0")->getSequence("Anc0.0")->getString(retrievedSeq);

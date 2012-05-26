@@ -18,6 +18,7 @@ import xml.etree.ElementTree as ET
 from cactus.progressive.multiCactusProject import MultiCactusProject
 from cactus.progressive.multiCactusTree import MultiCactusTree
 from cactus.progressive.experimentWrapper import ExperimentWrapper
+from cactus.progressive.ktserverLauncher import KtserverLauncher
 from sonLib.bioio import system
 
 class CommandLine(object) :
@@ -41,8 +42,17 @@ class CommandLine(object) :
 def getOutgroups(anExperimentObject):
     outgroup_list=anExperimentObject.getOutgroupEvents()
     if len(outgroup_list)==0:
-        return 'None'
+        return 'none'
     return outgroup_list[0]
+
+def executeCommandLine(expObject,HALpath):
+    cmdLine="importCactusIntoHAl -s {0} -d '{1}' -h {2} -o {3}".format(expObject.getMAFPath(),
+                                                                       expObject.getDiskDatabaseString(),
+                                                                       HALpath,
+                                                                       getOutgroups(expObject))
+                                                          
+    system(cmdLine)
+    
 ########################################################################
 # Main
 ########################################################################
@@ -54,21 +64,17 @@ def main():
     for genomeName in myProj.expMap.keys():
         
         experimentFilePath = myProj.expMap[genomeName]
-        experimentObject = ExperimentWrapper(ET.parse(experimentFilePath).getroot())
-        outgroup_list=experimentObject.getOutgroupEvents()
-        
-        cmdLineArgs="-s {0} -d '{1}' -h {2}".format(experimentObject.getMAFPath(),
-                                           experimentObject.getDiskDatabaseString(),
-                                           myComLine.args['HAL_file_path'])
-        cmdLineCmd= ''.join(['importCactusIntoHAl',' '])
-        
-        if not len(outgroup_list)==0:
-            cmdLineArgs=''.join([cmdLineArgs," -o {0}".format(outgroup_list[0])])                                                           
+        experiment = ExperimentWrapper(ET.parse(experimentFilePath).getroot())
         
         
-        # pass them to the c parser
-        #subprocess.call(cmdLineCmd+cmdLineArgs,shell=True)
-        system(cmdLineCmd+cmdLineArgs)
+        if experiment.getDbType() == "kyoto_tycoon":
+            ktserver = KtserverLauncher()
+            ktserver.spawnServer(experiment)
+            executeCommandLine(experiment,myComLine.args['HAL_file_path'])
+            ktserver.killServer(experiment)
+        else:
+            executeCommandLine(experiment,myComLine.args['HAL_file_path'])
+        
                          
 if __name__ == "__main__":
     main();
