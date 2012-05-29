@@ -159,8 +159,9 @@ void CactusHalScanDimensions::loadSequencesIntoHal(hal::AlignmentPtr theAlignmen
 	vector<hal::Sequence::Info>::const_iterator i;
 	for(i=GenomeInfo->second->begin();i!=GenomeInfo->second->end();++i)
 	{
-		string currSeq(_cactusDb.getSequence(GenomeInfo->first,i->_name));
-		theAlignment->openGenome(GenomeInfo->first)->setString(currSeq);
+		char* currSeq=_cactusDb.getSequence(GenomeInfo->first,i->_name);
+		theAlignment->openGenome(GenomeInfo->first)->getSequence(i->_name)->setString(currSeq);
+		free(currSeq);
 	}
 }
 
