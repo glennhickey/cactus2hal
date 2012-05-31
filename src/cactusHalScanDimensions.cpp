@@ -112,12 +112,12 @@ void CactusHalScanDimensions::loadDimensionsIntoHal(hal::AlignmentPtr newAlignme
 
 			if(isParent){
 				//the parent has the bottom sequences
-				newAlignment->openGenome(i->first)->setBottomDimensions(*updatedDims);
+				newAlignment->openGenome(i->first)->updateBottomDimensions(*updatedDims);
 			}
 			else
 			{
 				//it's a child - top sequences
-				newAlignment->openGenome(i->first)->setTopDimensions(*updatedDims);
+				newAlignment->openGenome(i->first)->updateTopDimensions(*updatedDims);
 			}
 			loadSequencesIntoHal(newAlignment,i);
 
