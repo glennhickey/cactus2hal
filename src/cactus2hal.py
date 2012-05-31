@@ -46,7 +46,7 @@ def getOutgroups(anExperimentObject):
     return outgroup_list[0]
 
 def executeCommandLine(expObject,HALpath):
-    cmdLine="importCactusIntoHAl -s {0} -d '{1}' -h {2} -o {3}".format(expObject.getMAFPath(),
+    cmdLine="importCactusIntoHal -s {0} -d '{1}' -h {2} -o {3}".format(expObject.getMAFPath(),
                                                                        expObject.getDiskDatabaseString(),
                                                                        HALpath,
                                                                        getOutgroups(expObject))
