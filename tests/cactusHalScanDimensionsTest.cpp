@@ -52,6 +52,10 @@ public:
 		_currentInfo._numTopSegments=testInfo._numTopSegments;
 	}
 
+	CactusDbWrapper* getDb(){
+		return &_cactusDb;
+	}
+
 	void executeFlush(){
 		flushCurrentIntoMap();
 	}
@@ -216,47 +220,35 @@ void CactusHalScanDimensionsConvertHalDimensionsTest(CuTest *testCase)
 
 void cactusHalScanDimensionsLoadSequencesIntoHalTest(CuTest *testCase)
 {
-	CactusHalScanDimensions testScanner1,testScanner2;
-	CactusDbWrapper testDbWrapper;
+	DimsTester testScanner1;
 	hal::AlignmentPtr theAlignment=hdf5AlignmentInstance();
 	char* AlignmentTempFile = getTempFile();
-	std::string StrTempFile(AlignmentTempFile);
-	theAlignment->createNew(StrTempFile);
-
-
-	//first sequence - parent
-	testDbWrapper.open(DB_Path1);
-
-	char* seq=testDbWrapper.getSequence("Anc0","Anc0.0");
-	string testSeq(seq);
-	size_t len=testDbWrapper.getSequenceLength("Anc0","Anc0.0");
-	testDbWrapper.close();
-
+	theAlignment->createNew(AlignmentTempFile);
+	theAlignment->addRootGenome("Anc0");
+	theAlignment->addLeafGenome("Anc4","Anc0",0.1);
 	testScanner1.scanDimensions(tempFilePath1,DB_Path1);
-	testScanner1.loadDimensionsIntoHal(theAlignment,scanner1outgroup);
 
+	//first sequence - root
+	theAlignment->openGenome("Anc0")->setDimensions(*testScanner1.getDimensionsMap()->at("Anc0"));
+	testScanner1.executeLoadSequences(theAlignment,testScanner1.getDimensionsMap()->find("Anc0"));
+	char* seq=testScanner1.getDb()->getSequence("Anc0","Anc0.0");
 	string retrievedSeq;
 	theAlignment->openGenome("Anc0")->getSequence("Anc0.0")->getString(retrievedSeq);
-	CuAssertTrue(testCase,theAlignment->openGenome("Anc0")->getSequence("Anc0.0")->getSequenceLength()==len);
-	CuAssertTrue(testCase,retrievedSeq.compare(testSeq)==0);
+	CuAssertTrue(testCase,retrievedSeq.compare(seq)==0);
 
+	free(seq);
 	//second sequence -child
-	testDbWrapper.open(DB_Path2);
+	seq=testScanner1.getDb()->getSequence("Anc4","Anc4.0");
+	theAlignment->openGenome("Anc4")->setDimensions(*testScanner1.getDimensionsMap()->at("Anc4"));
+	testScanner1.executeLoadSequences(theAlignment,testScanner1.getDimensionsMap()->find("Anc4"));
 
-	seq=testDbWrapper.getSequence("Anc3","Anc3.0");
-	string testSeq1(seq);
-	len=testDbWrapper.getSequenceLength("Anc3","Anc3.0");
-	testDbWrapper.close();
+	theAlignment->openGenome("Anc4")->getSequence("Anc4.0")->getString(retrievedSeq);
+	CuAssertTrue(testCase,retrievedSeq.compare(seq)==0);
 
-	testScanner1.scanDimensions(tempFilePath2,DB_Path2);
-	testScanner1.loadDimensionsIntoHal(theAlignment,scanner2outgroup);
-
-	theAlignment->openGenome("Anc3")->getSequence("Anc3.0")->getString(retrievedSeq);
-	CuAssertTrue(testCase,theAlignment->openGenome("Anc3")->getSequence("Anc3.0")->getSequenceLength()==len);
-	CuAssertTrue(testCase,retrievedSeq.compare(testSeq1)==0);
-
+	free(seq);
 	removeTempFile(AlignmentTempFile);
 }
+
 
 
 CuSuite* CactusHalScanDimensionsTestSuite(void)
