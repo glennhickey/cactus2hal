@@ -9,8 +9,9 @@
 int cactus2halAllTests(void) {
   CuString *output = CuStringNew();
   CuSuite* suite = CuSuiteNew();
-  CuSuiteAddSuite(suite, CactusHalScanDimensionsTestSuite());
   CuSuiteAddSuite(suite, cactusHalScannerTestSuite());
+  CuSuiteAddSuite(suite, cactusHalScanDimensionsTestSuite());
+  CuSuiteAddSuite(suite, cactusHalScanSegmentsTestSuite());
   CuSuiteRun(suite);
   CuSuiteSummary(suite, output);
   CuSuiteDetails(suite, output);

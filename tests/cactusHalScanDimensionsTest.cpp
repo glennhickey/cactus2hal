@@ -251,7 +251,7 @@ void cactusHalScanDimensionsLoadSequencesIntoHalTest(CuTest *testCase)
 
 
 
-CuSuite* CactusHalScanDimensionsTestSuite(void)
+CuSuite* cactusHalScanDimensionsTestSuite(void)
 {
 
   CuSuite* suite = CuSuiteNew();
