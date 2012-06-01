@@ -18,7 +18,7 @@ class CactusHalScanSegments : protected CactusHalScanner
 {
 public:
 
-	CactusHalScanSegments();
+	CactusHalScanSegments(hal::AlignmentPtr halAlignment);
 	~CactusHalScanSegments();
 
 protected:
@@ -29,7 +29,13 @@ protected:
 	void resetCurrent();
 
 protected:
-	hal_index_t _SegmentsCounter;
+	hal::AlignmentPtr _theAlignment;
+	std::string _parentGenome;
+	std::vector<std::string> _parentSequences;
+
+	std::string _currentGenome;
+	std::string _currentSequence;
+	hal_index_t _segmentsCounter;
 };
 
 

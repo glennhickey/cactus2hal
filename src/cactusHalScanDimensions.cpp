@@ -25,6 +25,7 @@ CactusHalScanDimensions::~CactusHalScanDimensions()
   {
     delete i->second;
   }
+
 }
 
 const GenMapType* CactusHalScanDimensions::getDimensionsMap() const
