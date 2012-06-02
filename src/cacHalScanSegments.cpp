@@ -36,7 +36,8 @@ void CactusHalScanSegments::scanTopSegment(CactusHalTopSegment& topSegment)
 {
 	Genome* currGenome=_theAlignment->openGenome(_currentGenome);
 	hal::Sequence* currSequence = currGenome->getSequence(_currentSequence);
-	TopSegment* currSegment=currSequence->getTopSegmentIterator(_segmentsCounter)->getTopSegment();
+	TopSegmentIteratorPtr currIterator=currSequence->getTopSegmentIterator(_segmentsCounter);
+	TopSegment* currSegment=currIterator->getTopSegment();
 	currSegment->setStartPosition(topSegment._start);
 	currSegment->setLength(topSegment._length);
 
@@ -48,7 +49,8 @@ void CactusHalScanSegments::scanBottomSegment(CactusHalBottomSegment& botSegment
 {
 	Genome* currGenome=_theAlignment->openGenome(_currentGenome);
 	hal::Sequence* currSequence = currGenome->getSequence(_currentSequence);
-	BottomSegment* currSegment=currSequence->getBottomSegmentIterator(_segmentsCounter)->getBottomSegment();
+	BottomSegmentIteratorPtr currIterator=currSequence->getBottomSegmentIterator(_segmentsCounter);
+	BottomSegment* currSegment=currIterator->getBottomSegment();
 	currSegment->setStartPosition(botSegment._start);
 	currSegment->setLength(botSegment._length);
 

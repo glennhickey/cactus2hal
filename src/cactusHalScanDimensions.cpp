@@ -92,7 +92,7 @@ void CactusHalScanDimensions::loadDimensionsIntoHal(hal::AlignmentPtr newAlignme
 
 		newAlignment->addRootGenome(*ParentName);
 		newAlignment->openGenome(*ParentName)->setDimensions((*_genomeMap[*ParentName]));
-		loadSequencesIntoHal(newAlignment,_genomeMap.find(*ParentName));
+
 	}
 
 	GenMapType::const_iterator i;
@@ -120,7 +120,7 @@ void CactusHalScanDimensions::loadDimensionsIntoHal(hal::AlignmentPtr newAlignme
 				//it's a child - top sequences
 				newAlignment->openGenome(i->first)->updateTopDimensions(*updatedDims);
 			}
-			loadSequencesIntoHal(newAlignment,i);
+
 
 
 		}
@@ -130,7 +130,7 @@ void CactusHalScanDimensions::loadDimensionsIntoHal(hal::AlignmentPtr newAlignme
 
 			newAlignment->addLeafGenome(i->first,*ParentName,0.1);
 			newAlignment->openGenome(i->first)->setDimensions(*i->second);
-			loadSequencesIntoHal(newAlignment,i);
+
 		}
 
 	}//for loop
@@ -156,13 +156,18 @@ vector<hal::Sequence::UpdateInfo>* CactusHalScanDimensions::convertHalDimensions
 		return formattedDims;
 }
 
-void CactusHalScanDimensions::loadSequencesIntoHal(hal::AlignmentPtr theAlignment,GenMapType::const_iterator GenomeInfo){
-	vector<hal::Sequence::Info>::const_iterator i;
-	for(i=GenomeInfo->second->begin();i!=GenomeInfo->second->end();++i)
+void CactusHalScanDimensions::loadSequencesIntoHal(hal::AlignmentPtr theAlignment)
+{
+	GenMapType::const_iterator genomeInfo;
+	for(genomeInfo=_genomeMap.begin();genomeInfo!=_genomeMap.end();++genomeInfo)
 	{
-		char* currSeq=_cactusDb.getSequence(GenomeInfo->first,i->_name);
-		theAlignment->openGenome(GenomeInfo->first)->getSequence(i->_name)->setString(currSeq);
+		vector<hal::Sequence::Info>::const_iterator i;
+		for(i=genomeInfo->second->begin();i!=genomeInfo->second->end();++i)
+		{
+		char* currSeq=_cactusDb.getSequence(genomeInfo->first,i->_name);
+		theAlignment->openGenome(genomeInfo->first)->getSequence(i->_name)->setString(currSeq);
 		free(currSeq);
+		}
 	}
 }
 

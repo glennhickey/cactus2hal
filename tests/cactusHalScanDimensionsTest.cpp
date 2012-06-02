@@ -60,10 +60,7 @@ public:
 		flushCurrentIntoMap();
 	}
 
-	void executeLoadSequences(hal::AlignmentPtr theAlignment,GenMapType::const_iterator GenomeInfo)
-	{
-		loadSequencesIntoHal(theAlignment,GenomeInfo);
-	}
+
 };
 
 
@@ -224,13 +221,12 @@ void cactusHalScanDimensionsLoadSequencesIntoHalTest(CuTest *testCase)
 	hal::AlignmentPtr theAlignment=hdf5AlignmentInstance();
 	char* AlignmentTempFile = getTempFile();
 	theAlignment->createNew(AlignmentTempFile);
-	theAlignment->addRootGenome("Anc0");
-	theAlignment->addLeafGenome("Anc4","Anc0",0.1);
 	testScanner1.scanDimensions(tempFilePath1,DB_Path1);
+	testScanner1.loadDimensionsIntoHal(theAlignment,scanner1outgroup);
+	testScanner1.loadSequencesIntoHal(theAlignment);
 
 	//first sequence - root
-	theAlignment->openGenome("Anc0")->setDimensions(*testScanner1.getDimensionsMap()->at("Anc0"));
-	testScanner1.executeLoadSequences(theAlignment,testScanner1.getDimensionsMap()->find("Anc0"));
+
 	char* seq=testScanner1.getDb()->getSequence("Anc0","Anc0.0");
 	string retrievedSeq;
 	theAlignment->openGenome("Anc0")->getSequence("Anc0.0")->getString(retrievedSeq);
@@ -239,8 +235,6 @@ void cactusHalScanDimensionsLoadSequencesIntoHalTest(CuTest *testCase)
 	free(seq);
 	//second sequence -child
 	seq=testScanner1.getDb()->getSequence("Anc4","Anc4.0");
-	theAlignment->openGenome("Anc4")->setDimensions(*testScanner1.getDimensionsMap()->at("Anc4"));
-	testScanner1.executeLoadSequences(theAlignment,testScanner1.getDimensionsMap()->find("Anc4"));
 
 	theAlignment->openGenome("Anc4")->getSequence("Anc4.0")->getString(retrievedSeq);
 	CuAssertTrue(testCase,retrievedSeq.compare(seq)==0);
