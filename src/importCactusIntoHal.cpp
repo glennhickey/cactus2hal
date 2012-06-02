@@ -108,7 +108,7 @@ int main(int argc, char** argv)
 	CactusHalScanDimensions DimensionsScanner;
 	DimensionsScanner.scanDimensions(halSegmentsFilePath,sequenceDB);
 	DimensionsScanner.loadDimensionsIntoHal(theNewAlignment,outgroup);
-	DimensionsScanner.loadSequencesIntoHal(theNewAlignment);
+	DimensionsScanner.loadSequencesIntoHal(theNewAlignment,outgroup);
 	theNewAlignment->close();
 
 }

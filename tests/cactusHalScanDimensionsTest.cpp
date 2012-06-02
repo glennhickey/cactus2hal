@@ -221,22 +221,22 @@ void cactusHalScanDimensionsLoadSequencesIntoHalTest(CuTest *testCase)
 	hal::AlignmentPtr theAlignment=hdf5AlignmentInstance();
 	char* AlignmentTempFile = getTempFile();
 	theAlignment->createNew(AlignmentTempFile);
-	testScanner1.scanDimensions(tempFilePath1,DB_Path1);
-	testScanner1.loadDimensionsIntoHal(theAlignment,scanner1outgroup);
-	testScanner1.loadSequencesIntoHal(theAlignment);
+	testScanner1.scanDimensions(tempFilePath2,DB_Path2);
+	testScanner1.loadDimensionsIntoHal(theAlignment,scanner2outgroup);
+	testScanner1.loadSequencesIntoHal(theAlignment,scanner2outgroup);
 
 	//first sequence - root
 
-	char* seq=testScanner1.getDb()->getSequence("Anc0","Anc0.0");
+	char* seq=testScanner1.getDb()->getSequence("Anc1","Anc1.0");
 	string retrievedSeq;
-	theAlignment->openGenome("Anc0")->getSequence("Anc0.0")->getString(retrievedSeq);
+	theAlignment->openGenome("Anc1")->getSequence("Anc1.0")->getString(retrievedSeq);
 	CuAssertTrue(testCase,retrievedSeq.compare(seq)==0);
 
 	free(seq);
 	//second sequence -child
-	seq=testScanner1.getDb()->getSequence("Anc4","Anc4.0");
+	seq=testScanner1.getDb()->getSequence("Anc3","Anc3.0");
 
-	theAlignment->openGenome("Anc4")->getSequence("Anc4.0")->getString(retrievedSeq);
+	theAlignment->openGenome("Anc3")->getSequence("Anc3.0")->getString(retrievedSeq);
 	CuAssertTrue(testCase,retrievedSeq.compare(seq)==0);
 
 	free(seq);

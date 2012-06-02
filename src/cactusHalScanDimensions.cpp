@@ -156,17 +156,20 @@ vector<hal::Sequence::UpdateInfo>* CactusHalScanDimensions::convertHalDimensions
 		return formattedDims;
 }
 
-void CactusHalScanDimensions::loadSequencesIntoHal(hal::AlignmentPtr theAlignment)
+void CactusHalScanDimensions::loadSequencesIntoHal(hal::AlignmentPtr theAlignment,const string& outgroupName)
 {
 	GenMapType::const_iterator genomeInfo;
 	for(genomeInfo=_genomeMap.begin();genomeInfo!=_genomeMap.end();++genomeInfo)
 	{
-		vector<hal::Sequence::Info>::const_iterator i;
-		for(i=genomeInfo->second->begin();i!=genomeInfo->second->end();++i)
+		if(genomeInfo->first.compare(outgroupName)!=0)
 		{
-		char* currSeq=_cactusDb.getSequence(genomeInfo->first,i->_name);
-		theAlignment->openGenome(genomeInfo->first)->getSequence(i->_name)->setString(currSeq);
-		free(currSeq);
+			vector<hal::Sequence::Info>::const_iterator i;
+			for(i=genomeInfo->second->begin();i!=genomeInfo->second->end();++i)
+			{
+				char* currSeq=_cactusDb.getSequence(genomeInfo->first,i->_name);
+				theAlignment->openGenome(genomeInfo->first)->getSequence(i->_name)->setString(currSeq);
+				free(currSeq);
+			}
 		}
 	}
 }

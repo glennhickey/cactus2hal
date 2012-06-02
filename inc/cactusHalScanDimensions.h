@@ -32,7 +32,7 @@ public:
                        const std::string& cactusDbString);
    const std::string* getParentName() const;
    void loadDimensionsIntoHal(hal::AlignmentPtr newAlignment, const std::string& outgroupName);
-   void loadSequencesIntoHal(hal::AlignmentPtr theAlignment);
+   void loadSequencesIntoHal(hal::AlignmentPtr theAlignment,const std::string& outgroupName);
 
    std::vector<hal::Sequence::UpdateInfo>* convertHalDimensions(std::vector<hal::Sequence::Info>* DimsToFormat,bool* isParent);
 protected:
