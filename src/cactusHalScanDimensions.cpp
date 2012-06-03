@@ -54,7 +54,6 @@ void CactusHalScanDimensions::scanSequence(CactusHalSequence& sequence)
   flushCurrentIntoMap();
   _currentGenome = sequence._event;
   _currentInfo._name = sequence._name;
-  _currentInfo._length = _currentSeqLength;
 }
 
 void CactusHalScanDimensions::scanTopSegment(CactusHalTopSegment& topSegment)
@@ -82,10 +81,13 @@ void CactusHalScanDimensions::resetCurrent()
   _currentInfo._length = 0;
   _currentInfo._numTopSegments = 0;
   _currentInfo._numBottomSegments = 0;
+  _currentSeqLength = 0;
 }
 
 void CactusHalScanDimensions::flushCurrentIntoMap()
 {
+  _currentInfo._length = _currentSeqLength;
+  cout << "cur " << _currentInfo._length << endl;
   if (_currentGenome.empty() == false)
   {
     GenMapType::iterator i = _genomeMap.find(_currentGenome);
