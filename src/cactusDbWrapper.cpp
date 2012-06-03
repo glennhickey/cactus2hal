@@ -126,6 +126,23 @@ size_t CactusDbWrapper::getSequenceLength(const string& eventName,
   return seqLength;
 }
 
+bool CactusDbWrapper::isOutgroup(const string& eventName)
+{
+  assert(_etree != NULL);
+
+  Event* event = eventTree_getEventByHeader(_etree, eventName.c_str());
+  return event_isOutgroup(event);
+}
+
+string CactusDbWrapper::getTree()
+{
+  assert(_etree != NULL);
+  char* tree = eventTree_makeNewickString(_etree);
+  string treeString(tree);
+  free(tree);
+  return treeString;
+}
+
 // DEBUGGING 
 void CactusDbWrapper::printSequenceNames()
 {

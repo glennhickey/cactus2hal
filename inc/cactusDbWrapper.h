@@ -31,6 +31,10 @@ public:
 
    size_t getSequenceLength(const std::string& eventName,
                             const std::string& sequenceName);
+   
+   bool isOutgroup(const std::string& eventName);
+
+   std::string getTree();
 
    // debugging function
    void printSequenceNames();

@@ -12,7 +12,6 @@
 #include <map>
 
 #include "cactusHalScanner.h"
-#include "cactusDbWrapper.h"
 
 typedef  std::map<std::string, std::vector<hal::Sequence::Info>* > GenMapType;
 /**
@@ -28,12 +27,8 @@ public:
 
    const GenMapType* getDimensionsMap() const;
 
-   void scanDimensions(const std::string& halFilePath,
-                       const std::string& cactusDbString);
-   const std::string* getParentName() const;
-   void loadDimensionsIntoHal(hal::AlignmentPtr newAlignment, const std::string& outgroupName);
+   void scanDimensions(const std::string& halFilePath);
 
-   std::vector<hal::Sequence::UpdateInfo>* convertHalDimensions(std::vector<hal::Sequence::Info>* DimsToFormat,bool* isParent);
 protected:
 
    void scanSequence(CactusHalSequence& sequence);
@@ -43,14 +38,13 @@ protected:
 
    void resetCurrent();
    void flushCurrentIntoMap();
-   void loadSequencesIntoHal(hal::AlignmentPtr theAlignment,GenMapType::const_iterator GenomeInfo);
+
 protected:
 
    GenMapType _genomeMap;
-   CactusDbWrapper _cactusDb;
    std::string _parentGenome;
-
    std::string _currentGenome;
+   hal_size_t _currentSeqLength;
    hal::Sequence::Info _currentInfo;
 };
 
