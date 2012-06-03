@@ -87,7 +87,6 @@ void CactusHalScanDimensions::resetCurrent()
 void CactusHalScanDimensions::flushCurrentIntoMap()
 {
   _currentInfo._length = _currentSeqLength;
-  cout << "cur " << _currentInfo._length << endl;
   if (_currentGenome.empty() == false)
   {
     GenMapType::iterator i = _genomeMap.find(_currentGenome);
