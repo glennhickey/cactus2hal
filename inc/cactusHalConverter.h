@@ -43,8 +43,8 @@ protected:
    void scanSequence(CactusHalSequence& sequence);
    void scanTopSegment(CactusHalTopSegment& topSegment);
    void scanBottomSegment(CactusHalBottomSegment& botSegment);
-   void updateParalogy();
-   void updateParseInfo(hal::BottomSegment* bottomSeg);
+   void updateDescent();
+   void updateParseInfo();
    void scanEndOfFile(){}
 
 protected:
@@ -58,27 +58,19 @@ protected:
    hal::SequenceIteratorPtr _sequenceIterator;
    hal::TopSegmentIteratorPtr _topIterator;
    hal::BottomSegmentIteratorPtr _bottomIterator;
+   hal::BottomSegmentIteratorPtr _parentIterator;
+   hal::BottomSegmentIteratorPtr _bottomParseIterator;
    size_t _sequenceIndex;
    bool _active;
    
-   struct SeqLess { bool operator()(hal::Sequence* seq1,
-                                    hal::Sequence* seq2); };
-   typedef std::map<hal::Sequence*, size_t, SeqLess> SeqMap;
-   typedef std::vector<hal::Sequence*> SeqVec;
-   typedef std::pair<size_t, hal_index_t> SegRef;
-   typedef std::set<SegRef> SegRefSet;
-   typedef std::map<int64_t, SegRefSet> ParentMap;
-   typedef std::map<std::string, size_t> ChildIdxMap;
-   typedef std::map<const hal::Genome*, hal_index_t> DupCache;
+   typedef std::map<int64_t, hal_index_t> NameMap;
+   typedef std::map<const hal::Genome*, size_t> ChildIdxMap;
+   typedef std::map<hal_index_t, hal_index_t> DupCache;
 
-   // go from hal sequence to unique sequence index
-   SeqMap _sequenceMap;
-   
-   // go from unique sequence index to hal sequence
-   SeqVec _sequenceVec;
-
-   // map a parent (bottom) segment to all segments descended from mit
-   ParentMap _parentMap;
+   // name of bottom segment to its index in the genome
+   // (completely dependent on assumption that there is only one 
+   // parent genome in the tree)
+   NameMap _nameMap;
 
    // convenience for checking which child number a genome is
    ChildIdxMap _childIdxMap;
@@ -87,27 +79,5 @@ protected:
    DupCache _dupCache;
 };
 
-// compare sequences by <genome name, sequence name> for purposes
-// of map indexing (maybe i should be using pointers instead of 
-// strings here...)
-inline bool 
-CactusHalConverter::SeqLess::operator()(hal::Sequence* seq1,
-                                        hal::Sequence* seq2)
-{
-  std::string gen1 = seq1->getGenome()->getName();
-  std::string gen2 = seq2->getGenome()->getName();
-  if (gen1 < gen2)
-  {
-    return true;
-  }
-  else if (gen2 > gen1)
-  {
-    return false;
-  }
-  else
-  {
-    return seq1->getName() < seq2->getName();
-  }
-}
 
 #endif

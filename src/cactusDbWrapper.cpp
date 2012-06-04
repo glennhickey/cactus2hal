@@ -82,11 +82,10 @@ char* CactusDbWrapper::getSequence(const string& eventName,
     const char* seqName = sequence_getHeader(seq);
     if (seqEventId == eventId && sequenceName == string(seqName))
     {
-      // todo: verify parameters
       seqString = sequence_getString(seq, 
                                      sequence_getStart(seq),
                                      sequence_getLength(seq),
-                                     0);
+                                     1);
       break;
     }
   }
