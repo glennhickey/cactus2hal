@@ -44,6 +44,7 @@ protected:
    void scanTopSegment(CactusHalTopSegment& topSegment);
    void scanBottomSegment(CactusHalBottomSegment& botSegment);
    void updateParalogy();
+   void updateParseInfo(hal::BottomSegment* bottomSeg);
    void scanEndOfFile(){}
 
 protected:

@@ -61,6 +61,8 @@ void CactusHalConverter::clear()
 
 void CactusHalConverter::convertGenomes()
 {
+  vector<pair<Genome*, bool> > inputGenomes;
+
   //pass 1: scan the genome dimensions from the .hal
   CactusHalScanDimensions dimensionScanner;
   dimensionScanner.scanDimensions(_halFilePath);
@@ -73,6 +75,7 @@ void CactusHalConverter::convertGenomes()
   assert(_cactusDb.isOutgroup(stTree_getLabel(root)) == false);
   deque<stTree*> bfQueue;
   bfQueue.push_back(root);
+  vector<pair<Genome*, bool> > readGenomes;
   while (bfQueue.empty() == false)
   {
     stTree* node = bfQueue.front();
@@ -113,16 +116,9 @@ void CactusHalConverter::convertGenomes()
           existingGenome = true;
         }
       }
-   
-      const vector<hal::Sequence::Info>* dims = mapIt->second;
-      // set / update the genome's dimensions
-      setGenomeDimensions(genome, dims, existingGenome);
-      if (existingGenome == false)
-      {
-        // copy in the dna sequence from the cactus database
-        setGenomeSequenceStrings(genome);
-      }
+      readGenomes.push_back(pair<Genome*, bool>(genome, existingGenome));
     }
+
     int32_t numChildren = stTree_getChildNumber(node);
     for (int32_t i = 0; i < numChildren; ++i)
     {
@@ -134,6 +130,26 @@ void CactusHalConverter::convertGenomes()
     }
   }
   
+  // set the dimensions of all the added genome AFTER the tree has 
+  // been imported
+  for (size_t i = 0; i < readGenomes.size(); ++i)
+  {
+    Genome* genome = readGenomes[i].first;
+    bool existingGenome = readGenomes[i].second;
+    GenMapType::const_iterator mapIt = genMap->find(genome->getName());
+    assert(mapIt != genMap->end());
+    const vector<hal::Sequence::Info>* dims = mapIt->second;    
+
+    // set / update the genome's dimensions
+    setGenomeDimensions(genome, dims, existingGenome);
+    if (existingGenome == false)
+    {
+      // copy in the dna sequence from the cactus database
+      setGenomeSequenceStrings(genome);
+    }
+  }
+
+  // keep an index of the child indexes
   vector<string> children = _alignment->getChildNames(
     _alignment->getRootName());
   for (size_t i = 0; i < children.size(); ++i)
@@ -211,6 +227,10 @@ void CactusHalConverter::scanSequence(CactusHalSequence& sequence)
   _sequenceVec.push_back(halSequence);
   if (sequence._isBottom == true)
   {
+    if (genome->getNumTopSegments() > 0)
+    {
+      _topIterator = halSequence->getTopSegmentIterator();
+    }
     _bottomIterator = halSequence->getBottomSegmentIterator();
   }
   else
@@ -229,13 +249,19 @@ void CactusHalConverter::scanTopSegment(CactusHalTopSegment& topSegment)
   hal_index_t startPos = 0;
   if (topSeg->getArrayIndex() > 0)
   {
+    _topIterator->toLeft();
+    topSeg = _topIterator->getTopSegment();
     startPos = topSeg->getStartPosition() + topSeg->getLength();
     _topIterator->toRight();
+    topSeg = _topIterator->getTopSegment();
   }
   topSeg->setStartPosition(startPos);
   topSeg->setLength(topSegment._length);
   topSeg->setParentReversed(topSegment._reversed);
-  topSeg->setParentIndex(hal::NULL_INDEX);
+  topSeg->setParentIndex(NULL_INDEX);
+  topSeg->setBottomParseIndex(NULL_INDEX);
+  topSeg->setBottomParseOffset(0);
+  topSeg->setNextParalogyIndex(NULL_INDEX);
   SegRef segRef(_sequenceIndex, topSeg->getArrayIndex());
   ParentMap::iterator mapIt = _parentMap.find(topSegment._parent);
   if (mapIt == _parentMap.end())
@@ -248,6 +274,7 @@ void CactusHalConverter::scanTopSegment(CactusHalTopSegment& topSegment)
   {
     mapIt->second.insert(segRef);
   }
+  _topIterator->toRight();
 }
 
 void CactusHalConverter::scanBottomSegment(CactusHalBottomSegment& botSegment)
@@ -260,13 +287,27 @@ void CactusHalConverter::scanBottomSegment(CactusHalBottomSegment& botSegment)
   hal_index_t startPos = 0;
   if (bottomSeg->getArrayIndex() > 0)
   {
+    _bottomIterator->toLeft();
+    bottomSeg = _bottomIterator->getBottomSegment();
     startPos = bottomSeg->getStartPosition() + bottomSeg->getLength();
     _bottomIterator->toRight();
+    bottomSeg = _bottomIterator->getBottomSegment();
   }
   bottomSeg->setStartPosition(startPos);
   bottomSeg->setLength(botSegment._length);
+  bottomSeg->setNextParalogyIndex(NULL_INDEX);
+  for (hal_size_t i = 0; i < bottomSeg->getNumChildren(); ++i)
+  {
+    bottomSeg->setChildIndex(i, NULL_INDEX);
+    bottomSeg->setChildReversed(i, false);
+  }
+  updateParseInfo(bottomSeg);
   
   ParentMap::iterator parIt = _parentMap.find(botSegment._name);
+
+  cout << "looking for parit in map of size " << _parentMap.size() << " and res "
+       << bool(parIt != _parentMap.end()) << endl;
+
   if (parIt != _parentMap.end())
   {
     Genome* prevGenome = NULL;
@@ -313,6 +354,7 @@ void CactusHalConverter::scanBottomSegment(CactusHalBottomSegment& botSegment)
     // that's the last time we'll ever add an edge to the bottom segment
     _parentMap.erase(parIt);
   }
+  _bottomIterator->toRight();
 }
 
 void CactusHalConverter::updateParalogy()
@@ -356,5 +398,63 @@ void CactusHalConverter::updateParalogy()
   else
   {
     cacheIt->second =  childSegment->getArrayIndex();
+  }
+}
+
+void CactusHalConverter::updateParseInfo(BottomSegment *bottomSeg)
+{
+  if (bottomSeg->getGenome()->getNumTopSegments() > 0)
+  {
+    // bring the top iterator rightward until its start position is 
+    // contained in the bottom segment
+    TopSegment* topSeg = _topIterator->getTopSegment();
+    assert(bottomSeg->getStartPosition() >= topSeg->getStartPosition());
+    while (bottomSeg->getStartPosition() >= topSeg->getStartPosition() +
+           topSeg->getLength())
+    {
+      _topIterator->toRight();
+      topSeg = _topIterator->getTopSegment();
+    }
+    assert(bottomSeg->getStartPosition() < topSeg->getStartPosition() +
+           topSeg->getLength() &&
+           bottomSeg->getStartPosition() >= topSeg->getStartPosition());
+    bottomSeg->setTopParseIndex(topSeg->getArrayIndex());
+    bottomSeg->setTopParseOffset(bottomSeg->getStartPosition() - 
+                                 topSeg->getStartPosition());
+
+    topSeg = NULL; // typo prevention
+
+    // search for and update any top segments that may use the bottom
+    // segment as a parse index
+    TopSegmentIteratorPtr topIterator2 = _topIterator->copy();
+    TopSegment* topSeg2 = topIterator2->getTopSegment();
+
+    // scan to the leftmost candidate
+    while (topSeg2->getStartPosition() + topSeg2->getLength() 
+           >= bottomSeg->getStartPosition())
+    {
+      topIterator2->toLeft();
+      topSeg2 = topIterator2->getTopSegment();
+    }
+    topIterator2->toRight();
+    topSeg2 = topIterator2->getTopSegment();
+
+    // scan right, updating any top segments whose start position overlaps
+    // with the bottom segment
+    while (topSeg2->getStartPosition() >= bottomSeg->getStartPosition() &&
+           topSeg2->getStartPosition() < bottomSeg->getStartPosition() +
+           bottomSeg->getLength())
+    {
+      topSeg2->setBottomParseIndex(bottomSeg->getArrayIndex());
+      topSeg2->setBottomParseOffset(topSeg2->getStartPosition() - 
+                                    bottomSeg->getStartPosition());
+      topIterator2->toRight();
+      topSeg2 = topIterator2->getTopSegment();
+    }
+  }
+  else
+  {
+     bottomSeg->setTopParseIndex(NULL_INDEX);
+     bottomSeg->setTopParseOffset(0);
   }
 }

@@ -26,7 +26,7 @@ static void checkOptions(int argc, char** argv)
 int main(int argc, char** argv)
 {
   checkOptions(argc, argv);
-  try
+  // try
   {
     string halFilePath = argv[1];
     string outputPath = argv[2];
@@ -50,16 +50,16 @@ int main(int argc, char** argv)
     CactusHalConverter converter;
     converter.convert(halFilePath, dbString, alignment);
   }
-  catch(hal_exception& e)
+/*  catch(hal_exception& e)
   {
     cerr << "hal exception caught: " << e.what() << endl;
     return 1;
   }
-  catch(exception& e)
+   catch(exception& e)
   {
     cerr << "Exception caught: " << e.what() << endl;
     return 1;
   }
-  
+*/
   return 0;
 }
