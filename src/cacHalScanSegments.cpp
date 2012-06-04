@@ -6,7 +6,13 @@
  */
 #include "cactusHalScanSegments.h"
 
+using namespace std;
 using namespace hal;
+
+CactusHalScanSegments::CactusHalScanSegments()
+{
+	_theAlignment=hdf5AlignmentInstance();
+}
 
 CactusHalScanSegments::CactusHalScanSegments(AlignmentPtr halAlignment)
 {
@@ -15,47 +21,58 @@ CactusHalScanSegments::CactusHalScanSegments(AlignmentPtr halAlignment)
 
 CactusHalScanSegments::~CactusHalScanSegments()
 {
-	_theAlignment->close();
 	//release parentSequences??
+}
+
+void CactusHalScanSegments::loadSegments(const string& halFilePath,const std::string& outgroupName)
+{
+	resetCurrent();
+	_outgroup=outgroupName;
+	scan(halFilePath);
 }
 
 
 void CactusHalScanSegments::scanSequence(CactusHalSequence& sequence)
 {
-	if (sequence._isBottom==true)
-	  {
-	    _parentGenome=sequence._event;
-	    _parentSequences.push_back(sequence._name);
-	  }
 
-	_currentGenome=sequence._event;
-	_currentSequence=sequence._name;
+		if (sequence._isBottom==true)
+		{
+			_parentGenome=sequence._event;
+			_parentSequences.push_back(sequence._name);
+		}
+		resetCurrent();
+		_currentGenome=sequence._event;
+		_currentSequence=sequence._name;
 }
 
 void CactusHalScanSegments::scanTopSegment(CactusHalTopSegment& topSegment)
 {
-	Genome* currGenome=_theAlignment->openGenome(_currentGenome);
-	hal::Sequence* currSequence = currGenome->getSequence(_currentSequence);
-	TopSegmentIteratorPtr currIterator=currSequence->getTopSegmentIterator(_segmentsCounter);
-	TopSegment* currSegment=currIterator->getTopSegment();
-	currSegment->setStartPosition(topSegment._start);
-	currSegment->setLength(topSegment._length);
+	if (!isOutgroup(_currentGenome))
+	{
+		Genome* currGenome=_theAlignment->openGenome(_currentGenome);
+		hal::Sequence* currSequence = currGenome->getSequence(_currentSequence);
+		TopSegmentIteratorPtr currIterator=currSequence->getTopSegmentIterator(_segmentsCounter);
+		TopSegment* currSegment=currIterator->getTopSegment();
+		currSegment->setStartPosition(topSegment._start);
+		currSegment->setLength(topSegment._length);
 
-
-	_segmentsCounter++;
+		_segmentsCounter++;
+	}
 }
 
 void CactusHalScanSegments::scanBottomSegment(CactusHalBottomSegment& botSegment)
 {
-	Genome* currGenome=_theAlignment->openGenome(_currentGenome);
-	hal::Sequence* currSequence = currGenome->getSequence(_currentSequence);
-	BottomSegmentIteratorPtr currIterator=currSequence->getBottomSegmentIterator(_segmentsCounter);
-	BottomSegment* currSegment=currIterator->getBottomSegment();
-	currSegment->setStartPosition(botSegment._start);
-	currSegment->setLength(botSegment._length);
+	if (!isOutgroup(_currentGenome))
+	{
+		Genome* currGenome=_theAlignment->openGenome(_currentGenome);
+		hal::Sequence* currSequence = currGenome->getSequence(_currentSequence);
+		BottomSegmentIteratorPtr currIterator=currSequence->getBottomSegmentIterator(_segmentsCounter);
+		BottomSegment* currSegment=currIterator->getBottomSegment();
+		currSegment->setStartPosition(botSegment._start);
+		currSegment->setLength(botSegment._length);
 
-
-	_segmentsCounter++;
+		_segmentsCounter++;
+	}
 }
 
 void CactusHalScanSegments::scanEndOfFile()
@@ -67,4 +84,11 @@ void CactusHalScanSegments::resetCurrent()
 	_segmentsCounter=0;
 	_currentGenome.clear();
 	_currentSequence.clear();
+
 }
+
+bool CactusHalScanSegments::isOutgroup(string& aGenome)
+{
+	return _outgroup==aGenome;
+}
+

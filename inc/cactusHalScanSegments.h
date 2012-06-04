@@ -18,18 +18,22 @@ class CactusHalScanSegments : protected CactusHalScanner
 {
 public:
 
+	CactusHalScanSegments();
 	CactusHalScanSegments(hal::AlignmentPtr halAlignment);
 	~CactusHalScanSegments();
-
+	void loadSegments(const std::string& halFilePath,const std::string& outgroupName);
 protected:
+
 	void scanSequence(CactusHalSequence& sequence);
 	void scanTopSegment(CactusHalTopSegment& topSegment);
 	void scanBottomSegment(CactusHalBottomSegment& botSegment);
 	void scanEndOfFile();
 	void resetCurrent();
+	bool isOutgroup(std::string& aGenome);
 
 protected:
 	hal::AlignmentPtr _theAlignment;
+	std::string _outgroup;
 	std::string _parentGenome;
 	std::vector<std::string> _parentSequences;
 

@@ -44,6 +44,7 @@ protected:
 
    void resetCurrent();
    void flushCurrentIntoMap();
+   void filterOutgroup(const std::string& outgroupName);
 
 protected:
 

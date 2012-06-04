@@ -85,7 +85,8 @@ void CactusHalScanDimensions::scanEndOfFile()
 
 void CactusHalScanDimensions::loadDimensionsIntoHal(hal::AlignmentPtr newAlignment, const string& outgroupName)
 {
-	  const string* ParentName=getParentName();
+	filterOutgroup(outgroupName);
+	const string* ParentName=getParentName();
 	//add the root Genome if alignment opened for the first time
 	if(newAlignment->getNumGenomes()==0)
 	{
@@ -99,11 +100,7 @@ void CactusHalScanDimensions::loadDimensionsIntoHal(hal::AlignmentPtr newAlignme
 	for (i = getDimensionsMap()->begin();
 			i != getDimensionsMap()->end(); ++i)
 	{
-
-		//check we are not dealing with the outgroup genome
-		if(i->first.compare(outgroupName)==0)
-		{}//do nothing
-		else if(newAlignment->openGenome(i->first)!=NULL)
+		if(newAlignment->openGenome(i->first)!=NULL)
 		{
 			//entry is in the genome,updating counts
 			//ToDo:need to parse in branch lengths!! - set them to zero for now!!
@@ -158,19 +155,18 @@ vector<hal::Sequence::UpdateInfo>* CactusHalScanDimensions::convertHalDimensions
 
 void CactusHalScanDimensions::loadSequencesIntoHal(hal::AlignmentPtr theAlignment,const string& outgroupName)
 {
+	filterOutgroup(outgroupName);
 	GenMapType::const_iterator genomeInfo;
 	for(genomeInfo=_genomeMap.begin();genomeInfo!=_genomeMap.end();++genomeInfo)
 	{
-		if(genomeInfo->first.compare(outgroupName)!=0)
+		vector<hal::Sequence::Info>::const_iterator i;
+		for(i=genomeInfo->second->begin();i!=genomeInfo->second->end();++i)
 		{
-			vector<hal::Sequence::Info>::const_iterator i;
-			for(i=genomeInfo->second->begin();i!=genomeInfo->second->end();++i)
-			{
-				char* currSeq=_cactusDb.getSequence(genomeInfo->first,i->_name);
-				theAlignment->openGenome(genomeInfo->first)->getSequence(i->_name)->setString(currSeq);
-				free(currSeq);
-			}
+			char* currSeq=_cactusDb.getSequence(genomeInfo->first,i->_name);
+			theAlignment->openGenome(genomeInfo->first)->getSequence(i->_name)->setString(currSeq);
+			free(currSeq);
 		}
+
 	}
 }
 
@@ -203,3 +199,9 @@ void CactusHalScanDimensions::flushCurrentIntoMap()
   }
   resetCurrent();
 }
+
+void CactusHalScanDimensions::filterOutgroup(const string& outgroupName)
+{
+	_genomeMap.erase(outgroupName);
+}
+

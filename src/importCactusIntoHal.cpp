@@ -25,6 +25,7 @@ extern "C" {
 #include "utils.h"
 #include "cactus2HALparser.h"
 #include "cactusHalScanDimensions.h"
+#include "cactusHalScanSegments.h"
 
 using namespace std;
 using namespace hal;
@@ -105,10 +106,12 @@ int main(int argc, char** argv)
 			theNewAlignment->open(hallignFilePath,false);
 		}
 
-	CactusHalScanDimensions DimensionsScanner;
-	DimensionsScanner.scanDimensions(halSegmentsFilePath,sequenceDB);
-	DimensionsScanner.loadDimensionsIntoHal(theNewAlignment,outgroup);
-	DimensionsScanner.loadSequencesIntoHal(theNewAlignment,outgroup);
+	CactusHalScanDimensions dimensionsScanner;
+	dimensionsScanner.scanDimensions(halSegmentsFilePath,sequenceDB);
+	dimensionsScanner.loadDimensionsIntoHal(theNewAlignment,outgroup);
+	dimensionsScanner.loadSequencesIntoHal(theNewAlignment,outgroup);
+	CactusHalScanSegments segmentsScanner(theNewAlignment);
+	segmentsScanner.loadSegments(halSegmentsFilePath,outgroup);
 	theNewAlignment->close();
 
 }

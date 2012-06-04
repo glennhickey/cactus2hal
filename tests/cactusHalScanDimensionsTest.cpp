@@ -144,8 +144,7 @@ void cactusHalScanDimensionsLoadDimensionsIntoHalTest(CuTest *testCase)
 	scanner2.scanDimensions(tempFilePath2,DB_Path2);
 	hal::AlignmentPtr theNewAlignment=hdf5AlignmentInstance();
 	char* AlignmentTempFile = getTempFile();
-	std::string StrTempFile(AlignmentTempFile);
-	theNewAlignment->createNew(StrTempFile);
+	theNewAlignment->createNew(AlignmentTempFile);
 	scanner1.loadDimensionsIntoHal(theNewAlignment,scanner1outgroup);
 
 	//load scanner1, check again what has happened
