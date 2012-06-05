@@ -22,7 +22,7 @@ struct CactusHalTopSegment
 
    hal_index_t _start;
    hal_size_t _length;
-   hal_index_t _parent;
+   hal_size_t _parent;
    bool _reversed;   
 };
 
