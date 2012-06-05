@@ -16,7 +16,7 @@ include  ${sonLibRootPath}/include.mk
 dataSetsPath=/Users/hickey/Documents/Devel/genomes/datasets
 
 cflags += -I ${sonLibPath} -I ${cactusPath} -I ${halPath} ${tokyoCabinetIncl} ${kyotoTycoonIncl} ${mysqlIncl} ${pgsqlIncl}
-cppflags += -I ${sonLibPath} -I ${cactusPath} -I ${halPath} ${tokyoCabinetIncl} ${kyotoTycoonIncl} ${mysqlIncl} ${pgsqlIncl}
+cppflags += -I ${sonLibPath} -I ${cactusPath} -I ${halPath} ${tokyoCabinetIncl} ${kyotoTycoonIncl} ${mysqlIncl} ${pgsqlIncl} -D__STDC_LIMIT_MACROS
 basicLibs = ${halPath}/halLib.a ${cactusPath}/cactusLib.a ${sonLibPath}/sonLib.a ${sonLibPath}/cuTest.a ${dblibs}
 basicLibsDependencies = ${sonLibPath}/cuTest.a 
 
