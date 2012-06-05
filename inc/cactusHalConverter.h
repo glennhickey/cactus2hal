@@ -62,6 +62,7 @@ protected:
    hal::BottomSegmentIteratorPtr _parentIterator;
    hal::BottomSegmentIteratorPtr _bottomParseIterator;
    size_t _sequenceIndex;
+   hal::Sequence* _halSequence;
    bool _active;
    
    typedef std::pair<hal::Genome*, hal_index_t> GenCoord;

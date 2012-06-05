@@ -220,8 +220,8 @@ void CactusHalConverter::scanSequence(CactusHalSequence& sequence)
     throw hal_exception(string("Cannot locate genome") + sequence._event +
                         " in the database");
   }
-  hal::Sequence* halSequence = genome->getSequence(sequence._name);
-  if (halSequence == NULL)
+  _halSequence = genome->getSequence(sequence._name);
+  if (_halSequence == NULL)
   {
     throw hal_exception(string("Cannot locate sequence") + sequence._name +
                         "in the genome " + sequence._event);
@@ -229,16 +229,16 @@ void CactusHalConverter::scanSequence(CactusHalSequence& sequence)
   
   if (sequence._isBottom == true)
   {
-    _bottomIterator = halSequence->getBottomSegmentIterator();
+    _bottomIterator = _halSequence->getBottomSegmentIterator();
   }
   else
   {
     if (genome->getNumBottomSegments() > 0)
     {
-      _parentIterator = halSequence->getBottomSegmentIterator();
-      _bottomParseIterator = halSequence->getBottomSegmentIterator();
+      _parentIterator = _halSequence->getBottomSegmentIterator();
+      _bottomParseIterator = _halSequence->getBottomSegmentIterator();
     }
-    _topIterator = halSequence->getTopSegmentIterator();
+    _topIterator = _halSequence->getTopSegmentIterator();
   }
 }
 
@@ -249,15 +249,7 @@ void CactusHalConverter::scanBottomSegment(CactusHalBottomSegment& botSegment)
     return;
   }
   BottomSegment* bottomSeg = _bottomIterator->getBottomSegment();
-  hal_index_t startPos = 0;
-  if (bottomSeg->getArrayIndex() > 0)
-  {
-    _bottomIterator->toLeft();
-    bottomSeg = _bottomIterator->getBottomSegment();
-    startPos = bottomSeg->getStartPosition() + bottomSeg->getLength();
-    _bottomIterator->toRight();
-    bottomSeg = _bottomIterator->getBottomSegment();
-  }
+  hal_index_t startPos = _halSequence->getStartPosition() + botSegment._start;
   bottomSeg->setStartPosition(startPos);
   bottomSeg->setLength(botSegment._length);
   bottomSeg->setNextParalogyIndex(NULL_INDEX);
@@ -282,15 +274,8 @@ void CactusHalConverter::scanTopSegment(CactusHalTopSegment& topSegment)
     return;
   }
   TopSegment* topSeg = _topIterator->getTopSegment();
-  hal_index_t startPos = 0;
-  if (topSeg->getArrayIndex() > 0)
-  {
-    _topIterator->toLeft();
-    topSeg = _topIterator->getTopSegment();
-    startPos = topSeg->getStartPosition() + topSeg->getLength();
-    _topIterator->toRight();
-    topSeg = _topIterator->getTopSegment();
-  }
+  assert (topSeg->getArrayIndex() < topSeg->getGenome()->getNumTopSegments());
+  hal_index_t startPos = _halSequence->getStartPosition() + topSegment._start;
   topSeg->setStartPosition(startPos);
   topSeg->setLength(topSegment._length);
   topSeg->setParentReversed(topSegment._reversed);
@@ -332,6 +317,7 @@ void CactusHalConverter::updateDescent()
 
   // set the edge from child to parent (note reversed flag
   // was already set)
+  assert(bottomSegment->getLength() == topSegment->getLength());
   topSegment->setParentIndex(bottomSegment->getArrayIndex());
 
   // set the edge from parent to child
