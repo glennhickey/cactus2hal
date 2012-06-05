@@ -360,7 +360,7 @@ void CactusHalConverter::updateDescent()
                                         topSegment->getParentReversed());
 
     DupCache::iterator cacheIt = _dupCache.find(
-      firstSegment->getArrayIndex());
+      GenCoord(topGenome, firstSegment->getArrayIndex()));
 
     // first duplication: add it directly
     if (firstSegment->getNextParalogyIndex() == NULL_INDEX)
@@ -390,8 +390,8 @@ void CactusHalConverter::updateDescent()
     // add the segment's index to the map
     if (cacheIt == _dupCache.end())
     {
-      _dupCache.insert(pair<hal_index_t, hal_index_t>(
-                         firstSegment->getArrayIndex(),
+      _dupCache.insert(pair<GenCoord, hal_index_t>(
+                         GenCoord(topGenome, firstSegment->getArrayIndex()),
                          topSegment->getArrayIndex()));
     }
     else

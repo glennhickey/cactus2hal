@@ -12,7 +12,7 @@
 #               
 ########################################################################
 
-import argparse,sys,os,subprocess
+import argparse,sys,os,subprocess,time
 
 import xml.etree.ElementTree as ET
 from cactus.progressive.multiCactusProject import MultiCactusProject
@@ -43,6 +43,10 @@ def main():
     print 'rm -f {0}'.format(args['HAL_file_path'])
     system('rm -f {0}'.format(args['HAL_file_path']))
 
+    # some quick stats
+    totalTime = time.time()
+    totalAppendTime = 0
+    
     # traverse tree to make sure we are going breadth-first
     tree = myProj.mcTree
     for node in tree.breadthFirstTraversal():
@@ -57,12 +61,19 @@ def main():
 
             cmdline = "halAppendCactusSubtree {0} \'{1}\' {2}".format(experiment.getHALPath(),
                                                                       experiment.getDiskDatabaseString(),
-                                                                      args['HAL_file_path'])
+                                                                      args['HAL_file_path'])            
             print cmdline
+            appendTime = time.time()
             system(cmdline)
+            appendTime = time.time() - appendTime
+            totalAppendTime += appendTime
+            print "time of above command: {0:.2f}".format(appendTime)
 
             if experiment.getDbType() == "kyoto_tycoon":            
                 ktserver.killServer(experiment)
+
+    totalTime = time.time() - totalTime
+    print "total time: {0:.2f}  total halAppendCactusSubtree time: {1:.2f}".format(totalTime, totalAppendTime)
                          
 if __name__ == "__main__":
     main();

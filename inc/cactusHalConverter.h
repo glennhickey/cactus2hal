@@ -64,9 +64,10 @@ protected:
    size_t _sequenceIndex;
    bool _active;
    
+   typedef std::pair<hal::Genome*, hal_index_t> GenCoord;
    typedef std::map<int64_t, hal_index_t> NameMap;
    typedef std::map<hal::Genome*, size_t> ChildIdxMap;
-   typedef std::map<hal_index_t, hal_index_t> DupCache;
+   typedef std::map<GenCoord, hal_index_t> DupCache;
 
    // name of bottom segment to its index in the genome
    // (completely dependent on assumption that there is only one 
