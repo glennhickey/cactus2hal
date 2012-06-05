@@ -160,7 +160,7 @@ void cactusHalScannerSmallTest(CuTest *testCase)
 
   CuAssertTrue(testCase, scanner._topSegments[1]._start == 7132328);
   CuAssertTrue(testCase, scanner._topSegments[1]._length == 2);
-  CuAssertTrue(testCase, scanner._topSegments[1]._parent == hal::NULL_INDEX);
+  CuAssertTrue(testCase, scanner._topSegments[1]._parent == NULL_NAME);
   
   CuAssertTrue(testCase, scanner._topSegments[2]._start == 152);
   CuAssertTrue(testCase, scanner._topSegments[2]._length == 33);
