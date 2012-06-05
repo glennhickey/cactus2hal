@@ -41,6 +41,7 @@ void CactusHalConverter::convert(const string& halFilePath,
   _treeString = _cactusDb.getTree();
   convertGenomes();
   convertSegments();
+  updateRootParseInfo();
   clear();
 }
 
@@ -157,7 +158,7 @@ void CactusHalConverter::convertGenomes()
   vector<string> children = _alignment->getChildNames(rootName);
   for (size_t i = 0; i < children.size(); ++i)
   {
-    _childIdxMap.insert(pair<const Genome*, size_t>(
+    _childIdxMap.insert(pair<Genome*, size_t>(
                           _alignment->openGenome(children[i]), i));
   }
 
@@ -458,5 +459,60 @@ void CactusHalConverter::updateParseInfo()
   {
      topSeg->setBottomParseIndex(NULL_INDEX);
      topSeg->setBottomParseOffset(0);
+  }
+}
+
+void CactusHalConverter::updateRootParseInfo()
+{
+  // just a terrible way to get the root genome but I'm 
+  // in a rush!!!
+  Genome* rootGenome = _childIdxMap.begin()->first->getParent();
+  assert(rootGenome != NULL);
+  
+  BottomSegmentIteratorPtr bottomIterator = rootGenome->getBottomSegmentIterator();
+  TopSegmentIteratorPtr topIterator = rootGenome->getTopSegmentIterator();
+  BottomSegmentIteratorConstPtr bend = rootGenome->getBottomSegmentEndIterator();
+  TopSegmentIteratorConstPtr tend = rootGenome->getTopSegmentEndIterator();
+
+  while (bottomIterator != bend && topIterator != tend)
+  {
+    bool bright = false;
+    bool tright = false;
+    BottomSegment* bseg = bottomIterator->getBottomSegment();
+    TopSegment* tseg = topIterator->getTopSegment();
+    hal_index_t bstart = bseg->getStartPosition();
+    hal_index_t bend = bstart + (hal_index_t)bseg->getLength();
+    hal_index_t tstart = tseg->getStartPosition();
+    hal_index_t tend = tstart + (hal_index_t)tseg->getLength();
+    
+    if (bstart >= tstart && bstart < tend)
+    {
+      bseg->setTopParseIndex(tseg->getArrayIndex());
+      bseg->setTopParseOffset(bstart - tstart);
+    }
+    if (bend <= tend || bstart == bend)
+    {
+      bright = true;
+    }
+        
+    if (tstart >= bstart && tstart < bend)
+    {
+      tseg->setBottomParseIndex(bseg->getArrayIndex());
+      tseg->setBottomParseOffset(tstart - bstart);
+    }
+    if (tend <= bend || tstart == tend)
+    {
+      tright = true;
+    }
+
+    assert(bright || tright);
+    if (bright == true)
+    {
+      bottomIterator->toRight();
+    }
+    if (tright == true)
+    {
+      topIterator->toRight();
+    }
   }
 }

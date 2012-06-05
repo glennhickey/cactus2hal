@@ -40,6 +40,7 @@ def main():
     myProj.readXML(args['cactus_project'])
 
     # for now we do not support appending at the script level
+    print 'rm -f {0}'.format(args['HAL_file_path'])
     system('rm -f {0}'.format(args['HAL_file_path']))
 
     # traverse tree to make sure we are going breadth-first

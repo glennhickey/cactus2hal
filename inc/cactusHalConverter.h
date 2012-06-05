@@ -45,6 +45,7 @@ protected:
    void scanBottomSegment(CactusHalBottomSegment& botSegment);
    void updateDescent();
    void updateParseInfo();
+   void updateRootParseInfo();
    void scanEndOfFile(){}
 
 protected:
@@ -64,7 +65,7 @@ protected:
    bool _active;
    
    typedef std::map<int64_t, hal_index_t> NameMap;
-   typedef std::map<const hal::Genome*, size_t> ChildIdxMap;
+   typedef std::map<hal::Genome*, size_t> ChildIdxMap;
    typedef std::map<hal_index_t, hal_index_t> DupCache;
 
    // name of bottom segment to its index in the genome
