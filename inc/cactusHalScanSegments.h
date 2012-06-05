@@ -19,9 +19,8 @@ class CactusHalScanSegments : protected CactusHalScanner
 public:
 
 	CactusHalScanSegments();
-	CactusHalScanSegments(hal::AlignmentPtr halAlignment);
 	~CactusHalScanSegments();
-	void loadSegments(const std::string& halFilePath,const std::string& outgroupName);
+	void loadSegments(hal::AlignmentPtr halAlignment,const std::string& halFilePath,const std::string& outgroupName);
 protected:
 
 	void scanSequence(CactusHalSequence& sequence);

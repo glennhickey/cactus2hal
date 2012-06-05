@@ -66,6 +66,10 @@ public:
 	{
 		_currentSequence=seqName;
 	}
+	void setAlignment(hal::AlignmentPtr halAlignment)
+	{
+		_theAlignment=halAlignment;
+	}
 
 	void executeScanSequence(CactusHalSequence& sequence)
 	{
@@ -117,6 +121,7 @@ void cactusHalScanSegmentsScanTopSegmentTest(CuTest *testCase)
 {
 	SegmentsTester testScanner;
 	char* AlignmentTempFile = getTempFile();
+	testScanner.setAlignment(hal::hdf5AlignmentInstance());
 	testScanner.getAlignment()->createNew(AlignmentTempFile);
 	CactusHalScanDimensions dimTester;
 	dimTester.scanDimensions(tempFilePath,DB_Path);
@@ -160,6 +165,7 @@ void cactusHalScanSegmentsScanBottomSegmentTest(CuTest *testCase)
 {
 	SegmentsTester testScanner;
 	char* AlignmentTempFile = getTempFile();
+	testScanner.setAlignment(hal::hdf5AlignmentInstance());
 	testScanner.getAlignment()->createNew(AlignmentTempFile);
 	CactusHalScanDimensions dimTester;
 	dimTester.scanDimensions(tempFilePath,DB_Path);
@@ -192,12 +198,13 @@ void cactusHalScanSegmentsScanBottomSegmentTest(CuTest *testCase)
 void cactusHalScanSegmentsLoadSegmentsTest(CuTest *testCase)
 {
 	SegmentsTester testScanner;
+	testScanner.setAlignment(hal::hdf5AlignmentInstance());
 	char* AlignmentTempFile = getTempFile();
 	testScanner.getAlignment()->createNew(AlignmentTempFile);
 	CactusHalScanDimensions dimTester;
 	dimTester.scanDimensions(tempFilePath,DB_Path);
 	dimTester.loadDimensionsIntoHal(testScanner.getAlignment(),scannerOutgroup);
-	testScanner.loadSegments(tempFilePath,scannerOutgroup);
+	testScanner.loadSegments(testScanner.getAlignment(),tempFilePath,scannerOutgroup);
 
 
 	//1st sequence

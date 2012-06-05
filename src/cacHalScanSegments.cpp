@@ -11,12 +11,7 @@ using namespace hal;
 
 CactusHalScanSegments::CactusHalScanSegments()
 {
-	_theAlignment=hdf5AlignmentInstance();
-}
 
-CactusHalScanSegments::CactusHalScanSegments(AlignmentPtr halAlignment)
-{
-	_theAlignment=halAlignment;
 }
 
 CactusHalScanSegments::~CactusHalScanSegments()
@@ -24,9 +19,10 @@ CactusHalScanSegments::~CactusHalScanSegments()
 	//release parentSequences??
 }
 
-void CactusHalScanSegments::loadSegments(const string& halFilePath,const std::string& outgroupName)
+void CactusHalScanSegments::loadSegments(hal::AlignmentPtr halAlignment,const string& halFilePath,const std::string& outgroupName)
 {
 	resetCurrent();
+	_theAlignment=halAlignment;
 	_outgroup=outgroupName;
 	scan(halFilePath);
 }
