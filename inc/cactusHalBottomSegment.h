@@ -11,19 +11,22 @@
 #include <istream>
 
 #include "hal.h"
+extern "C" {
+#include "cactus.h"
+}
 
 /** structure containing the information from a bottom segment line of 
  * the cactus .hal file */
 struct CactusHalBottomSegment
 {
-   CactusHalBottomSegment(hal_size_t name = 0,
+   CactusHalBottomSegment(Name name = NULL_NAME,
                           hal_index_t start = hal::NULL_INDEX,
                           hal_size_t length = 0) :
      _name(name),
      _start(start), 
      _length(length) {}
    
-   hal_size_t _name;
+   Name _name;
    hal_index_t _start;
    hal_size_t _length;
 };
@@ -35,6 +38,7 @@ std::istream& operator>>(std::istream& istr,
   istr >> bottomSegment._name;
   istr >> bottomSegment._start;
   istr >> bottomSegment._length;
+  assert(bottomSegment._name != NULL_NAME);
   return istr;
 }
 

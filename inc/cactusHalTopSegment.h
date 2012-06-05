@@ -11,18 +11,21 @@
 #include <iostream>
 
 #include "hal.h"
+extern "C" {
+#include "cactus.h"
+}
 
 struct CactusHalTopSegment
 {
    CactusHalTopSegment(hal_index_t start = hal::NULL_INDEX,
                        hal_size_t length = 0,
-                       hal_index_t parent = hal::NULL_INDEX,
+                       Name parent = NULL_NAME,
                        bool reversed = false) :
      _start(start), _length(length), _parent(parent), _reversed(reversed) {}
 
    hal_index_t _start;
    hal_size_t _length;
-   hal_size_t _parent;
+   Name _parent;
    bool _reversed;   
 };
 
@@ -32,7 +35,7 @@ std::istream& operator>>(std::istream& istr, CactusHalTopSegment& topSegment)
   istr >> topSegment._start;
   istr >> topSegment._length;
   
-  topSegment._parent = hal::NULL_INDEX;
+  topSegment._parent = NULL_NAME;
 
   istr >> std::ws;
   std::streampos pos = istr.tellg();

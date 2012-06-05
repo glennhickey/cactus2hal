@@ -261,8 +261,8 @@ void CactusHalConverter::scanBottomSegment(CactusHalBottomSegment& botSegment)
   bottomSeg->setTopParseIndex(NULL_INDEX);
   bottomSeg->setTopParseOffset(0);
   
-  _nameMap.insert(pair<int64_t, hal_index_t>(botSegment._name,
-                                            bottomSeg->getArrayIndex()));
+  _nameMap.insert(pair<Name, hal_index_t>(botSegment._name,
+                                          bottomSeg->getArrayIndex()));
   
   _bottomIterator->toRight();
 }
@@ -284,9 +284,9 @@ void CactusHalConverter::scanTopSegment(CactusHalTopSegment& topSegment)
   topSeg->setBottomParseOffset(0);
   topSeg->setNextParalogyIndex(NULL_INDEX);
 
-  if (topSegment._parent != NULL_INDEX)
+  if (topSegment._parent != NULL_NAME)
   {
-    map<int64_t, hal_index_t>::iterator nameMapIt = _nameMap.find(
+    map<Name, hal_index_t>::iterator nameMapIt = _nameMap.find(
       topSegment._parent);
     if (nameMapIt == _nameMap.end())
     {
@@ -399,7 +399,7 @@ void CactusHalConverter::updateParseInfo()
     BottomSegment* bottomSeg = _bottomParseIterator->getBottomSegment();
     assert(topSeg->getStartPosition() >= bottomSeg->getStartPosition());
     while (topSeg->getStartPosition() >= bottomSeg->getStartPosition() +
-           bottomSeg->getLength())
+           (hal_index_t)bottomSeg->getLength())
     {
       _bottomParseIterator->toRight();
       bottomSeg = _bottomParseIterator->getBottomSegment();
@@ -419,7 +419,7 @@ void CactusHalConverter::updateParseInfo()
     BottomSegment* bottomSeg2 = bottomParseIterator2->getBottomSegment();
 
     // scan to the leftmost candidate
-    while (bottomSeg2->getStartPosition() + bottomSeg2->getLength() 
+    while (bottomSeg2->getStartPosition() + (hal_index_t)bottomSeg2->getLength() 
            >= topSeg->getStartPosition())
     {
       bottomParseIterator2->toLeft();
@@ -432,7 +432,7 @@ void CactusHalConverter::updateParseInfo()
     // with the top segment
     while (bottomSeg2->getStartPosition() >= topSeg->getStartPosition() &&
            bottomSeg2->getStartPosition() < topSeg->getStartPosition() +
-           topSeg->getLength())
+           (hal_index_t)topSeg->getLength())
     {
       bottomSeg2->setTopParseIndex(topSeg->getArrayIndex());
       bottomSeg2->setTopParseOffset(bottomSeg2->getStartPosition() - 
