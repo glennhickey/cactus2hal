@@ -77,6 +77,7 @@ void CactusHalConverter::convertGenomes()
   deque<stTree*> bfQueue;
   bfQueue.push_back(root);
   vector<pair<Genome*, bool> > readGenomes;
+  string rootName;
   while (bfQueue.empty() == false)
   {
     stTree* node = bfQueue.front();
@@ -90,6 +91,7 @@ void CactusHalConverter::convertGenomes()
       //case 1: add a new root to the alignment
       if (_alignment->getNumGenomes() == 0)
       {
+        rootName = stTree_getLabel(node);
         genome = _alignment->addRootGenome(stTree_getLabel(node));
       }
       else
@@ -108,12 +110,13 @@ void CactusHalConverter::convertGenomes()
         //the root of the given tree.
         else
         {
-          if (node != root)
+          if (stTree_getChildNumber(node) == 0 || rootName.empty() == false)
           {
-            throw hal_exception(string("Fatal Tree error.  converter"
-                                       "does not support adding the same"
-                                       "leaf twice:") + genome->getName());
+            throw hal_exception(string("Fatal Tree error.  converter "
+                                       "does not support adding more than one non-"
+                                       "leaf:") + genome->getName());
           }
+          rootName = stTree_getLabel(node);
           existingGenome = true;
         }
       }
@@ -151,8 +154,7 @@ void CactusHalConverter::convertGenomes()
   }
 
   // keep an index of the child indexes
-  vector<string> children = _alignment->getChildNames(
-    _alignment->getRootName());
+  vector<string> children = _alignment->getChildNames(rootName);
   for (size_t i = 0; i < children.size(); ++i)
   {
     _childIdxMap.insert(pair<const Genome*, size_t>(

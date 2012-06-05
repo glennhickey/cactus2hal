@@ -21,60 +21,47 @@ from cactus.progressive.experimentWrapper import ExperimentWrapper
 from cactus.progressive.ktserverLauncher import KtserverLauncher
 from sonLib.bioio import system
 
-class CommandLine(object) :
-    
-    
-    def __init__(self) :
+def initParser():
+    parser = argparse.ArgumentParser(description = 'Convert Cactus database to HAL database ', 
+                                          add_help = True, #default is True 
+                                          prefix_chars = '-')
+    parser.add_argument('cactus_project', type=argparse.FileType('r'), action = 'store', 
+                             help="cactus project xml file")
+    parser.add_argument('HAL_file_path', type=str, action = 'store', 
+                             help="file path where newly created HAL file is to be stored.")
+    return vars(parser.parse_args())
         
-        self.parser = argparse.ArgumentParser(description = 'Extracts path information for all files \
-                                               that need to be converted to the HAL format and initiates\
-                                               their conversion. The input path information comes as an \
-                                               xml file. ', 
-                                             add_help = True, #default is True 
-                                             prefix_chars = '-')
-        self.parser.add_argument('xml_list', type=argparse.FileType('r'), action = 'store', 
-                                 help="xml file of all alignments that need to be parsed")
-        self.parser.add_argument('HAL_file_path', type=str, action = 'store', 
-                                 help="file path where newly created HAL file is to be stored.")
-        self.args = vars(self.parser.parse_args())
-        
-
-def getOutgroups(anExperimentObject):
-    outgroup_list=anExperimentObject.getOutgroupEvents()
-    if len(outgroup_list)==0:
-        return 'none'
-    return outgroup_list[0]
-
-def executeCommandLine(expObject,HALpath):
-    cmdLine="importCactusIntoHal -s {0} -d '{1}' -h {2} -o {3}".format(expObject.getMAFPath(),
-                                                                       expObject.getDiskDatabaseString(),
-                                                                       HALpath,
-                                                                       getOutgroups(expObject))
-                                                          
-    system(cmdLine)
-    
 ########################################################################
 # Main
 ########################################################################
 def main():
-    myComLine=CommandLine() 
-    myProj=MultiCactusProject()
-    myProj.readXML(myComLine.args['xml_list'])
-    
-    for genomeName in myProj.expMap.keys():
-        
-        experimentFilePath = myProj.expMap[genomeName]
-        experiment = ExperimentWrapper(ET.parse(experimentFilePath).getroot())
-        
-        
-        if experiment.getDbType() == "kyoto_tycoon":
-            ktserver = KtserverLauncher()
-            ktserver.spawnServer(experiment)
-            executeCommandLine(experiment,myComLine.args['HAL_file_path'])
-            ktserver.killServer(experiment)
-        else:
-            executeCommandLine(experiment,myComLine.args['HAL_file_path'])
-        
+    args = initParser()
+    myProj = MultiCactusProject()
+    myProj.readXML(args['cactus_project'])
+
+    # for now we do not support appending at the script level
+    system('rm -f {0}'.format(args['HAL_file_path']))
+
+    # traverse tree to make sure we are going breadth-first
+    tree = myProj.mcTree
+    for node in tree.breadthFirstTraversal():
+        genomeName = tree.getName(node)
+        if genomeName in myProj.expMap:
+            experimentFilePath = myProj.expMap[genomeName]
+            experiment = ExperimentWrapper(ET.parse(experimentFilePath).getroot())
+
+            if experiment.getDbType() == "kyoto_tycoon":
+                ktserver = KtserverLauncher()
+                ktserver.spawnServer(experiment)
+
+            cmdline = "halAppendCactusSubtree {0} \'{1}\' {2}".format(experiment.getHALPath(),
+                                                                      experiment.getDiskDatabaseString(),
+                                                                      args['HAL_file_path'])
+            print cmdline
+            system(cmdline)
+
+            if experiment.getDbType() == "kyoto_tycoon":            
+                ktserver.killServer(experiment)
                          
 if __name__ == "__main__":
     main();

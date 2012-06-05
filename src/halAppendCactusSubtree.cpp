@@ -17,8 +17,8 @@ static void checkOptions(int argc, char** argv)
 {
   if (argc != 4)
   {
-    cerr << "Usage: halAppendCactusSubtree <cactus .hal file> <output hal path> "
-       " <cactus dbString>" << endl;
+    cerr << "Usage: halAppendCactusSubtree <cactus .hal file> <cactus dbString> "
+       "<output hal path>" << endl;
     exit(1);
   }
 }
@@ -29,8 +29,9 @@ int main(int argc, char** argv)
   // try
   {
     string halFilePath = argv[1];
-    string outputPath = argv[2];
-    string dbString = argv[3];
+    string dbString = argv[2];
+    string outputPath = argv[3];
+
     AlignmentPtr alignment;
 
     if (!ifstream(halFilePath.c_str()))
