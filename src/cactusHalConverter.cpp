@@ -286,7 +286,7 @@ void CactusHalConverter::scanTopSegment(CactusHalTopSegment& topSegment)
 
   if (topSegment._parent != NULL_NAME)
   {
-    map<Name, hal_index_t>::iterator nameMapIt = _nameMap.find(
+    NameMap::iterator nameMapIt = _nameMap.find(
       topSegment._parent);
     if (nameMapIt == _nameMap.end())
     {
