@@ -10,6 +10,10 @@
 #include <string>
 #include <fstream>
 #include <map>
+#ifdef __GNUG__ 
+#include <ext/hash_map>
+#endif
+#include <limits>
 
 #include "hal.h"
 #include "cactusHalScanDimensions.h"
@@ -65,10 +69,29 @@ protected:
    hal::Sequence* _halSequence;
    bool _active;
    
+
    typedef std::pair<hal::Genome*, hal_index_t> GenCoord;
+   
+   // C++ hash tables have only recently become standard (unordered_map in 
+   // c++Ox).  but while we are stuck with older compilers, we use the
+   // deprecated __gnu_cxx::hash_map which should at least work for any
+   // somewhat recent (<= v4.0 ??) gcc.  other compilers revert to the
+   // potentitally less-efficient map for now
+#ifdef __GNUG__ 
+   struct NameHash { size_t operator()(Name key) const {
+     return (size_t) key % std::numeric_limits<size_t>::max();}
+   };
+   struct GenCoordHash { size_t operator()(const GenCoord& key) const {
+     int i1 = ((size_t)key.first) % std::numeric_limits<int>::max();
+     int i2 = key.second % std::numeric_limits<int>::max();
+     return __gnu_cxx::hash<int>()(i1 + i2);}};
+   typedef __gnu_cxx::hash_map<Name, hal_index_t, NameHash> NameMap;
+   typedef __gnu_cxx::hash_map<GenCoord, hal_index_t, GenCoordHash> DupCache;
+#else
    typedef std::map<Name, hal_index_t> NameMap;
-   typedef std::map<hal::Genome*, size_t> ChildIdxMap;
    typedef std::map<GenCoord, hal_index_t> DupCache;
+#endif
+   typedef std::map<hal::Genome*, size_t> ChildIdxMap;
 
    // name of bottom segment to its index in the genome
    // (completely dependent on assumption that there is only one 
