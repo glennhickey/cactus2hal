@@ -57,7 +57,7 @@ def main():
 
             if experiment.getDbType() == "kyoto_tycoon":
                 ktserver = KtserverLauncher()
-                ktserver.spawnServer(experiment)
+                ktserver.spawnServer(experiment, readOnly=True)
 
             cmdline = "halAppendCactusSubtree {0} \'{1}\' {2}".format(experiment.getHALPath(),
                                                                       experiment.getDiskDatabaseString(),
