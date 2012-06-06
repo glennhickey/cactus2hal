@@ -75,7 +75,7 @@ protected:
    // C++ hash tables have only recently become standard (unordered_map in 
    // c++Ox).  but while we are stuck with older compilers, we use the
    // deprecated __gnu_cxx::hash_map which should at least work for any
-   // somewhat recent (<= v4.0 ??) gcc.  other compilers revert to the
+   // somewhat recent (>= v4.0 ??) gcc.  other compilers revert to the
    // potentitally less-efficient map for now
 #ifdef __GNUG__ 
    struct NameHash { size_t operator()(Name key) const {
