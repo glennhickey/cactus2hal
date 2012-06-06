@@ -59,7 +59,7 @@ def main():
                 ktserver = KtserverLauncher()
                 ktserver.spawnServer(experiment, readOnly=True)
 
-            cmdline = "halAppendCactusSubtree {0} \'{1}\' {2}".format(experiment.getHALPath(),
+            cmdline = "time halAppendCactusSubtree {0} \'{1}\' {2}".format(experiment.getHALPath(),
                                                                       experiment.getDiskDatabaseString(),
                                                                       args['HAL_file_path'])            
             print cmdline
@@ -67,7 +67,7 @@ def main():
             system(cmdline)
             appendTime = time.time() - appendTime
             totalAppendTime += appendTime
-            print "time of above command: {0:.2f}".format(appendTime)
+#            print "time of above command: {0:.2f}".format(appendTime)
 
             if experiment.getDbType() == "kyoto_tycoon":            
                 ktserver.killServer(experiment)
