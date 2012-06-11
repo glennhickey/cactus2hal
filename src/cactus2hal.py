@@ -29,18 +29,18 @@ def initParser():
                              help="cactus project xml file")
     parser.add_argument('HAL_file_path', type=str, action = 'store', 
                              help="file path where newly created HAL file is to be stored.")
-    parser.add_argument('--cacheBytes', type=int, default=10485760,
-                      help="maximum size in bytes of regular hdf5 cache [default = %(default)s]")
-    parser.add_argument('--cacheMDC', type=int, default=113,
-                      help="number of metadata slots in hdf5 cache [default = %(default)s]")
-    parser.add_argument('--cacheRDC', type=int, default=10009,
-                      help="number of regular slots in hdf5 cache [default = %(default)s]")
-    parser.add_argument('--cacheW0', type=int, default=0.75,
-                      help="w0 parameter for hdf5 cache [default = %(default)s]")
-    parser.add_argument('--chunk', type=int, default=2500,
-                      help="hdf5 chunk size [default = %(default)s]")
-    parser.add_argument('--deflate', type=int, default=2,
-                      help="hdf5 compression factor [default = %(default)s]")
+    parser.add_argument('--cacheBytes', type=int, default=None,
+                      help="maximum size in bytes of regular hdf5 cache")
+    parser.add_argument('--cacheMDC', type=int, default=None,
+                      help="number of metadata slots in hdf5 cache")
+    parser.add_argument('--cacheRDC', type=int, default=None,
+                      help="number of regular slots in hdf5 cache")
+    parser.add_argument('--cacheW0', type=int, default=None,
+                      help="w0 parameter for hdf5 cache")
+    parser.add_argument('--chunk', type=int, default=None,
+                      help="hdf5 chunk size")
+    parser.add_argument('--deflate', type=int, default=None,
+                      help="hdf5 compression factor")
 
     return vars(parser.parse_args())
         
@@ -73,13 +73,18 @@ def main():
                 ktserver.spawnServer(experiment, readOnly=True)
 
             cmdline = "time halAppendCactusSubtree {0} \'{1}\' {2}".format(experiment.getHALPath(), experiment.getDiskDatabaseString(), args['HAL_file_path'])
-            
-            cmdline += " --cacheBytes {0}".format(args["cacheBytes"])
-            cmdline += " --cacheMDC {0}".format(args["cacheMDC"])
-            cmdline += " --cacheRDC {0}".format(args["cacheRDC"])
-            cmdline += " --cacheW0 {0}".format(args["cacheW0"])
-            cmdline += " --chunk {0}".format(args["chunk"])
-            cmdline += " --deflate {0}".format(args["deflate"])
+            if args["cacheBytes"] is not None:
+                cmdline += " --cacheBytes {0}".format(args["cacheBytes"])
+            if args["cacheMDC"] is not None:
+                cmdline += " --cacheMDC {0}".format(args["cacheMDC"])
+            if args["cacheRDC"] is not None:
+                cmdline += " --cacheRDC {0}".format(args["cacheRDC"])
+            if args["cacheW0"] is not None:
+                cmdline += " --cacheW0 {0}".format(args["cacheW0"])
+            if args["chunk"] is not None:
+                cmdline += " --chunk {0}".format(args["chunk"])
+            if args["deflate"] is not None:
+                cmdline += " --deflate {0}".format(args["deflate"])
             
             print cmdline
             appendTime = time.time()
