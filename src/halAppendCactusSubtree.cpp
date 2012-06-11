@@ -13,24 +13,34 @@
 using namespace std;
 using namespace hal;
 
-static void checkOptions(int argc, char** argv)
-{
-  if (argc != 4)
-  {
-    cerr << "Usage: halAppendCactusSubtree <cactus .hal file> <cactus dbString> "
-       "<output hal path>" << endl;
-    exit(1);
-  }
-}
 
 int main(int argc, char** argv)
 {
-  checkOptions(argc, argv);
+  CLParserPtr optionsParser = hdf5CLParserInstance(true);
+  optionsParser->addArgument("cactus .hal file", 
+                             "path to cactus hal file to import");
+  optionsParser->addArgument("cactus dbString", 
+                             "XML database element as string");
+  optionsParser->addArgument("output hal path",
+                             "path of hal file to append cactus subtree");
+  optionsParser->setDescription("Append a cactus databse to a hal database"
+                                ". If the hal database doesn't exist, a new "
+                                "one is created");
+  try
+  {
+    optionsParser->parseOptions(argc, argv);
+  }
+  catch(exception& e)
+  {
+    cerr << e.what() << endl;
+    optionsParser->printUsage(cerr);
+    exit(1);
+  }
   // try
   {
-    string halFilePath = argv[1];
-    string dbString = argv[2];
-    string outputPath = argv[3];
+    string halFilePath = optionsParser->getArgument<string>("cactus .hal file");
+    string dbString = optionsParser->getArgument<string>("cactus dbString");
+    string outputPath = optionsParser->getArgument<string>("output hal path");
 
     AlignmentPtr alignment;
 
@@ -41,11 +51,12 @@ int main(int argc, char** argv)
 
     if (ifstream(outputPath.c_str()))
     {
-      alignment = openHalAlignment(outputPath);
+      alignment = openHalAlignment(outputPath, optionsParser);
     }
     else
     {
       alignment = hdf5AlignmentInstance();
+      alignment->setOptionsFromParser(optionsParser);
       alignment->createNew(outputPath);
     }
     CactusHalConverter converter;
