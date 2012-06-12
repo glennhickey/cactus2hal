@@ -181,7 +181,17 @@ void CactusHalConverter::setGenomeDimensions(
     {
       const hal::Sequence::Info& info = dimensions->at(i);
       hal::Sequence::UpdateInfo update(info._name, info._numBottomSegments);
-      updateDimensions.push_back(update);
+      // .hal files can contain empty sequences in bottom genomes that 
+      // were not present in the top view. 
+      // this causes an exception in the updateBottomDimensions which is
+      // not alowed to add new sequences.
+      // we get around this for now by simply stripping out empty sequences
+      // that would cause such a problem. 
+      if (info._numBottomSegments > 0 || 
+          genome->getSequence(info._name) != NULL)
+      {
+        updateDimensions.push_back(update);        
+      }
     }
     genome->updateBottomDimensions(updateDimensions);
   }
@@ -194,10 +204,13 @@ void CactusHalConverter::setGenomeSequenceStrings(Genome* genome)
   for (; sequenceIterator != end; sequenceIterator->toNext())
   {
     hal::Sequence* sequence = sequenceIterator->getSequence();
-    char* sequenceString = _cactusDb.getSequence(genome->getName(),
-                                                 sequence->getName());
-    sequence->setString(sequenceString);
-    free(sequenceString);
+    if (sequence->getSequenceLength() > 0)
+    {
+      char* sequenceString = _cactusDb.getSequence(genome->getName(),
+                                                   sequence->getName());
+      sequence->setString(sequenceString);
+      free(sequenceString);
+    }
   }
 }
 
