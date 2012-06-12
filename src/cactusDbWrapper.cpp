@@ -47,7 +47,15 @@ void CactusDbWrapper::open(const string& dbString)
     throw runtime_error("problem opening " + dbString);
   }
   _flower = cactusDisk_getFlower(_disk, (Name)0);
+  if (_flower == NULL)
+  {
+    throw runtime_error("problem loading flower from " + dbString);
+  }
   _etree = flower_getEventTree(_flower);
+  if (_etree == NULL)
+  {
+    throw runtime_error("problem loading etree from " + dbString);
+  }
   
   stKVDatabaseConf_destruct(kvDatabaseConf);
 }
