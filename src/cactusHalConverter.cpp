@@ -58,6 +58,7 @@ void CactusHalConverter::clear()
   _nameMap.clear();
   _childIdxMap.clear();
   _dupCache.clear();
+  _skipSequences.clear();
   _active = false;
 }
 
@@ -192,6 +193,10 @@ void CactusHalConverter::setGenomeDimensions(
       {
         updateDimensions.push_back(update);        
       }
+      else
+      {
+        _skipSequences.insert(info._name);
+      }
     }
     genome->updateBottomDimensions(updateDimensions);
   }
@@ -222,7 +227,8 @@ void CactusHalConverter::convertSegments()
 void CactusHalConverter::scanSequence(CactusHalSequence& sequence)
 {
   _active = _cactusDb.isOutgroup(sequence._event) == false;
-  if (_active == false)
+  if (_active == false || 
+      _skipSequences.find(sequence._name) != _skipSequences.end())
   {
     return;
   }
