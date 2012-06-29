@@ -6,6 +6,7 @@
 #include <cassert>
 #include <iostream>
 #include <stdexcept>
+#include <sstream>
 
 #include "cactusHalScanner.h"
 
@@ -45,8 +46,12 @@ void CactusHalScanner::scan(const std::string& halFilePath)
     if (buffer == "s")
     {
       _halFile >> sequenceBuffer;
+      if (!_halFile.good())
+      {
+        throw runtime_error("error parsing sequence " + 
+                            sequenceBuffer._name);
+      }
       isBottom = sequenceBuffer._isBottom;
-
       scanSequence(sequenceBuffer);
     }
     else if (buffer == "a")
@@ -54,11 +59,28 @@ void CactusHalScanner::scan(const std::string& halFilePath)
       if (isBottom == true)
       {
         _halFile >> bsegBuffer;
+        if (!_halFile.good())
+        {
+          stringstream ss;
+          ss << "error parsing bottom segment with name " 
+             << bsegBuffer._name << " and start position " 
+             << bsegBuffer._start << " in sequence " 
+             << sequenceBuffer._name;
+          throw runtime_error(ss.str());
+        }
         scanBottomSegment(bsegBuffer);
       }
       else
       {
         _halFile >> tsegBuffer;
+        if (!_halFile.good())
+        {
+          stringstream ss;
+          ss << "error parsing top segment with start position " 
+             << tsegBuffer._start << " in sequence " 
+             << sequenceBuffer._name;
+          throw runtime_error(ss.str());
+        }
         scanTopSegment(tsegBuffer);
       }
     }
