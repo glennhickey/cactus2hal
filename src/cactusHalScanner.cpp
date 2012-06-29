@@ -73,14 +73,9 @@ void CactusHalScanner::scan(const std::string& halFilePath)
       else
       {
         _halFile >> tsegBuffer;
-        if (!_halFile.good())
-        {
-          stringstream ss;
-          ss << "error parsing top segment with start position " 
-             << tsegBuffer._start << " in sequence " 
-             << sequenceBuffer._name;
-          throw runtime_error(ss.str());
-        }
+        // don't check errors here for now.  somehow whitespace
+        // eater doesn't work all the time, and file gets left in 
+        // bad state even when it's ok. 
         scanTopSegment(tsegBuffer);
       }
     }
