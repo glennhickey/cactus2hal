@@ -9,6 +9,7 @@
 
 #include <string>
 #include <iostream>
+#include <cctype>
 
 #include "hal.h"
 extern "C" {
@@ -29,31 +30,34 @@ struct CactusHalTopSegment
    bool _reversed;   
 };
 
-inline
-std::istream& operator>>(std::istream& istr, CactusHalTopSegment& topSegment)
+inline std::istream& operator>>(std::istream& istr, CactusHalTopSegment& topSegment)
 {
   istr >> topSegment._start;
   istr >> topSegment._length;
   
-  topSegment._parent = NULL_NAME;
-
-  istr >> std::ws;
-  std::streampos pos = istr.tellg();
-  if (!istr.eof())
+  char c = istr.peek();
+  while (!istr.bad() && isspace(istr.peek()))
   {
-    char buffer[64];
-    istr >> buffer;
-    istr.seekg(pos);
-
-    if (buffer[0] != 'a' && buffer[0] != 's')
-    {
-      istr >> topSegment._parent;
-      int orientation;
-      istr >> orientation;
-      topSegment._reversed = orientation == 0 ? true : false;
-    }
+    istr.get(c);
+  }  
+  c  = istr.peek();
+  assert(!isspace(istr.peek()));
+  
+  if (!istr.bad() && isdigit(c))
+  {
+    istr >> topSegment._parent;
+    int orientation;
+    istr >> orientation;
+    topSegment._reversed = orientation == 0 ? true : false;
   }
+  else
+  {
+    topSegment._parent = NULL_NAME;
+    topSegment._reversed = true;
+  }
+
   return istr;
 }
+
 
 #endif
