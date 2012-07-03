@@ -39,13 +39,6 @@ void CactusHalConverter::convert(const string& halFilePath,
   _halFilePath = halFilePath;
   _faFilePath = faFilePath;
   _outgroups = set<string>(outgroups.begin(), outgroups.end());
-
-
-  cout << "outgroups : ";
-  for (vector<string>::const_iterator i = outgroups.begin(); i != outgroups.end(); ++i)
-     cout << *i << endl;
-
-
   _alignment = alignment;
   _treeString = treeString;
   convertGenomes();
