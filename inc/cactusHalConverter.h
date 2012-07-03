@@ -18,8 +18,6 @@
 
 #include "hal.h"
 #include "cactusHalScanDimensions.h"
-#include "cactusDbWrapper.h"
-
 
 /**
  * Convert cactus .hal into proper hal database
@@ -32,8 +30,10 @@ public:
    ~CactusHalConverter();
 
    void convert(const std::string& halFilePath,
-                const std::string& cactusDbString,
-                hal::AlignmentPtr alignment);
+                const std::string& faFilePath,
+                const std::string& treeString,
+                hal::AlignmentPtr alignment,
+                const std::vector<std::string>& outgroups);
 
 protected:
 
@@ -56,11 +56,12 @@ protected:
 protected:
    
    std::string _halFilePath;
-   std::string _cactusDbString;
+   std::string _faFilePath;
    std::string _outDbPath;
    std::string _treeString;
+   CactusHalScanDimensions _dimensionScanner;
+   std::set<std::string> _outgroups;
    hal::AlignmentPtr _alignment;   
-   CactusDbWrapper _cactusDb;
    hal::SequenceIteratorPtr _sequenceIterator;
    hal::TopSegmentIteratorPtr _topIterator;
    hal::BottomSegmentIteratorPtr _bottomIterator;
@@ -70,7 +71,6 @@ protected:
    hal::Sequence* _halSequence;
    bool _active;
    
-
    typedef std::pair<hal::Genome*, hal_index_t> GenCoord;
    
    // C++ hash tables have only recently become standard (unordered_map in 

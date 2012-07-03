@@ -32,7 +32,8 @@ const GenMapType* CactusHalScanDimensions::getDimensionsMap() const
   return &_genomeMap;
 }
 
-void CactusHalScanDimensions::scanDimensions(const string& halFilePath)
+void CactusHalScanDimensions::scanDimensions(const string& halFilePath,
+                                             const string& fastaFilePath)
 {
   GenMapType::iterator i;
   for (i = _genomeMap.begin(); i != _genomeMap.end(); ++i)
@@ -40,8 +41,8 @@ void CactusHalScanDimensions::scanDimensions(const string& halFilePath)
     delete i->second;
   }
   _genomeMap.clear();
-
   resetCurrent();
+  _faReader.open(fastaFilePath);
   scan(halFilePath);
 }
 
@@ -102,6 +103,18 @@ void CactusHalScanDimensions::flushCurrentIntoMap()
       _genomeMap.insert(pair<string, vector<hal::Sequence::Info>*>(
                           _currentGenome, infoVec));
     }
+    if (_currentInfo._length > 0)
+    {
+      _faReader.bookmarkNextSequence(_currentGenome, _currentInfo._name);
+    }
+
   }
   resetCurrent();
+}
+
+void CactusHalScanDimensions::getSequence(const string& genomeName, 
+                                          const string& sequenceName,
+                                          string& outSequence)
+{
+  _faReader.getSequence(genomeName, sequenceName, outSequence);
 }
