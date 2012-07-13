@@ -342,7 +342,7 @@ void CactusHalConverter::updateDescent()
 
   // set the edge from parent to child
   assert(_childIdxMap.find(topSegment->getGenome()) != _childIdxMap.end());
-  size_t genIdx = _childIdxMap.at(topSegment->getGenome());
+  size_t genIdx = _childIdxMap.find(topSegment->getGenome())->second;
   hal_index_t currentChildIndex = bottomSegment->getChildIndex(genIdx);
   if (currentChildIndex == NULL_INDEX)
   {
