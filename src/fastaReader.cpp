@@ -60,11 +60,33 @@ void FastaReader::skip()
   }
 }
 
+void FastaReader::skipToSequence(const string& sequenceName)
+{
+  string buffer;
+  char c;
+  while (_faFile.bad() != true)
+  {
+    skip();
+    if (_faFile.peek() != '>')
+    {
+      stringstream ss;
+      ss << "Error skipping to sequence, " << sequenceName;
+      throw runtime_error(ss.str());
+    }
+    _faFile.get(c);
+    _faFile >> buffer;
+    if (buffer == sequenceName)
+    {
+      break;
+    }
+  }    
+}
+
 void FastaReader::bookmarkNextSequence(const string& genomeName,
                                        const string& sequenceName)
 {
-  skip();
-  if (!_faFile || _faFile.peek() != '>')
+  skipToSequence(sequenceName);
+  if (!_faFile)
   {
     stringstream ss;
     ss << "Error scanning next sequence for " << genomeName << ", "
@@ -79,7 +101,8 @@ void FastaReader::bookmarkNextSequence(const string& genomeName,
        << sequenceName << ": already added to map";
     throw runtime_error(ss.str());
   }
-  _bookmarks.insert(pair<SeqKey, streampos>(key, _faFile.tellg()));
+  streampos pos = _faFile.tellg() - (streamoff)sequenceName.length();
+  _bookmarks.insert(pair<SeqKey, streampos>(key, pos));
   char buf;
   do
   {
@@ -114,14 +137,13 @@ void FastaReader::getSequence(const string& genomeName,
   }
   string header;
   _faFile >> header;
-  if (!_faFile || header[0] != '>' || header.length() < 2)
+  if (!_faFile || header.length() < 1)
   {
     stringstream ss;
     ss << "Error reading sequence " << genomeName << ", "
        << sequenceName << " from fasta file";
     throw runtime_error(ss.str());
   }
-  header.erase(0, 1);
   if (header != sequenceName)
   {
     stringstream ss;
