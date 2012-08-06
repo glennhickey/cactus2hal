@@ -29,6 +29,8 @@ def initParser():
                              help="cactus project xml file")
     parser.add_argument('HAL_file_path', type=str, action = 'store', 
                              help="file path where newly created HAL file is to be stored.")
+    parser.add_argument('--event', type=str, action = 'store', default=None,
+                        help='root event of the input phylogeny')
     parser.add_argument('--cacheBytes', type=int, default=None,
                       help="maximum size in bytes of regular hdf5 cache")
     parser.add_argument('--cacheMDC', type=int, default=None,
@@ -59,10 +61,18 @@ def main():
     # some quick stats
     totalTime = time.time()
     totalAppendTime = 0
-    
+
     # traverse tree to make sure we are going breadth-first
     tree = myProj.mcTree
-    for node in tree.breadthFirstTraversal():
+
+    # find subtree if event specified
+    event = args['event']
+    rootNode = None
+    if event is not None:
+        assert event in tree.nameToId and not tree.isLeaf(tree.nameToId[event])
+        rootNode = tree.nameToId[event]
+
+    for node in tree.breadthFirstTraversal(rootNode):
         genomeName = tree.getName(node)
         if genomeName in myProj.expMap:
             experimentFilePath = myProj.expMap[genomeName]
