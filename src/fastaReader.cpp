@@ -71,6 +71,7 @@ void FastaReader::skipToSequence(const string& sequenceName)
     {
       stringstream ss;
       ss << "Error skipping to sequence, " << sequenceName;
+      ss << ".. got \"" << (char)_faFile.peek() << "\" when expecting \">\"";
       throw runtime_error(ss.str());
     }
     _faFile.get(c);
