@@ -47,7 +47,7 @@ void FastaReader::skip()
 {
   char buffer;
   while (!_faFile.bad() && 
-         (isspace(_faFile.peek()) == true || _faFile.peek() == ';'))
+         (isspace(_faFile.peek()) || _faFile.peek() == ';'))
   {
     _faFile.get(buffer);
     if (buffer == ';')
