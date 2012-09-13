@@ -26,5 +26,5 @@ HDF5_CXX = ${cpp}
 HDF5_CXXLINKER = ${cpp}
 HDF5_CC = ${cxx}
 HDF5_CCLINKER = ${cxx} 
-cpp = h5c++
-cxx = h5cc
+cpp = h5c++ ${h5prefix}
+cxx = h5cc ${h5prefix}
