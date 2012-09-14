@@ -13,7 +13,7 @@ clean :
 	rm -f ${libPath}/cactus2halLib.a ${binPath}/halAppendCactusSubtree ${binPath}/cactus2hal.py #${binPath}/importCactusTests *.o
 
 test: all
-	python tests/allTests.py
+#	python tests/allTests.py
 
 ${libPath}/cactus2halLib.a : ${libSources} ${libHeaders} ${basicLibsDependencies} 
 	${cpp} ${cppflags} -I inc -I src -c ${libSources}
