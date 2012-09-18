@@ -12,6 +12,7 @@
 #include <map>
 
 #include "cactusHalScanner.h"
+#include "fastaReader.h"
 
 typedef  std::map<std::string, std::vector<hal::Sequence::Info>* > GenMapType;
 /**
@@ -21,13 +22,17 @@ class CactusHalScanDimensions : protected CactusHalScanner
 {
 public:
 
-
    CactusHalScanDimensions();
    ~CactusHalScanDimensions();
 
    const GenMapType* getDimensionsMap() const;
 
-   void scanDimensions(const std::string& halFilePath);
+   void scanDimensions(const std::string& halFilePath,
+                       const std::string& fastaFilePath);
+
+   void getSequence(const std::string& genomeName, 
+                    const std::string& sequenceName,
+                    std::string& outSequence);
 
 protected:
 
@@ -46,6 +51,7 @@ protected:
    std::string _currentGenome;
    hal_size_t _currentSeqLength;
    hal::Sequence::Info _currentInfo;
+   FastaReader _faReader;
 };
 
 #endif

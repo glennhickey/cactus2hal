@@ -30,15 +30,17 @@ CactusHalConverter::~CactusHalConverter()
 }
 
 void CactusHalConverter::convert(const string& halFilePath,
-                                 const string& cactusDbString,
-                                 AlignmentPtr alignment)
+                                 const string& faFilePath,
+                                 const string& treeString,
+                                 AlignmentPtr alignment,
+                                 const vector<string>& outgroups)
 {
   clear();
   _halFilePath = halFilePath;
-  _cactusDbString = cactusDbString;
+  _faFilePath = faFilePath;
+  _outgroups = set<string>(outgroups.begin(), outgroups.end());
   _alignment = alignment;
-  _cactusDb.open(cactusDbString);
-  _treeString = _cactusDb.getTree();
+  _treeString = treeString;
   convertGenomes();
   convertSegments();
   updateRootParseInfo();
@@ -48,7 +50,6 @@ void CactusHalConverter::convert(const string& halFilePath,
 void CactusHalConverter::clear()
 {
   _alignment = AlignmentPtr();
-  _cactusDb.close();
   _sequenceIterator = SequenceIteratorPtr();
   _topIterator = TopSegmentIteratorPtr();
   _bottomIterator = BottomSegmentIteratorPtr();
@@ -60,6 +61,7 @@ void CactusHalConverter::clear()
   _dupCache.clear();
   _skipSequences.clear();
   _active = false;
+  _outgroups.clear();
 }
 
 void CactusHalConverter::convertGenomes()
@@ -67,15 +69,14 @@ void CactusHalConverter::convertGenomes()
   vector<pair<Genome*, bool> > inputGenomes;
 
   //pass 1: scan the genome dimensions from the .hal
-  CactusHalScanDimensions dimensionScanner;
-  dimensionScanner.scanDimensions(_halFilePath);
-  const GenMapType* genMap = dimensionScanner.getDimensionsMap();
+  _dimensionScanner.scanDimensions(_halFilePath, _faFilePath);
+  const GenMapType* genMap = _dimensionScanner.getDimensionsMap();
   
   //iterate over input tree, using map to set the information for each
   //genome
   char* ctreeString = const_cast<char*>(_treeString.c_str());
   stTree* root = stTree_parseNewickString(ctreeString);
-  assert(_cactusDb.isOutgroup(stTree_getLabel(root)) == false);
+  assert(_outgroups.find(stTree_getLabel(root)) == _outgroups.end());
   deque<stTree*> bfQueue;
   bfQueue.push_back(root);
   vector<pair<Genome*, bool> > readGenomes;
@@ -129,7 +130,7 @@ void CactusHalConverter::convertGenomes()
     for (int32_t i = 0; i < numChildren; ++i)
     {
       stTree* child = stTree_getChild(node, i);
-      if (_cactusDb.isOutgroup(stTree_getLabel(child)) == false)
+      if (_outgroups.find(stTree_getLabel(child)) == _outgroups.end())
       {
         bfQueue.push_back(child);
       }
@@ -204,6 +205,7 @@ void CactusHalConverter::setGenomeDimensions(
 
 void CactusHalConverter::setGenomeSequenceStrings(Genome* genome)
 {
+  string buffer;
   SequenceIteratorPtr sequenceIterator = genome->getSequenceIterator();
   SequenceIteratorConstPtr end = genome->getSequenceEndIterator();
   for (; sequenceIterator != end; sequenceIterator->toNext())
@@ -211,10 +213,9 @@ void CactusHalConverter::setGenomeSequenceStrings(Genome* genome)
     hal::Sequence* sequence = sequenceIterator->getSequence();
     if (sequence->getSequenceLength() > 0)
     {
-      char* sequenceString = _cactusDb.getSequence(genome->getName(),
-                                                   sequence->getName());
-      sequence->setString(sequenceString);
-      free(sequenceString);
+      _dimensionScanner.getSequence(genome->getName(), sequence->getName(), 
+                                    buffer);
+      sequence->setString(buffer);
     }
   }
 }
@@ -226,7 +227,7 @@ void CactusHalConverter::convertSegments()
 
 void CactusHalConverter::scanSequence(CactusHalSequence& sequence)
 {
-  _active = _cactusDb.isOutgroup(sequence._event) == false;
+  _active = _outgroups.find(sequence._event) == _outgroups.end();
   if (_active == false || 
       _skipSequences.find(sequence._name) != _skipSequences.end())
   {

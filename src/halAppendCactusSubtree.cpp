@@ -6,6 +6,7 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <cassert>
 #include <fstream>
 
 #include "cactusHalConverter.h"
@@ -17,12 +18,18 @@ using namespace hal;
 int main(int argc, char** argv)
 {
   CLParserPtr optionsParser = hdf5CLParserInstance(true);
-  optionsParser->addArgument("cactus .hal file", 
+  optionsParser->addArgument("cactus .c2h file", 
                              "path to cactus hal file to import");
-  optionsParser->addArgument("cactus dbString", 
-                             "XML database element as string");
+  optionsParser->addArgument("cactus .fa file", 
+                             "path to cactus sequences file to import");
+  optionsParser->addArgument("newick tree", 
+                             "event tree for cactus db in Newick format");
   optionsParser->addArgument("output hal path",
                              "path of hal file to append cactus subtree");
+  optionsParser->addOption("outgroups",
+                           "comma-separated list of outgroup events "
+                           "which will be skipped by the conversion.",
+                           "\"\"");
   optionsParser->setDescription("Append a cactus databse to a hal database"
                                 ". If the hal database doesn't exist, a new "
                                 "one is created");
@@ -38,9 +45,16 @@ int main(int argc, char** argv)
   }
   // try
   {
-    string halFilePath = optionsParser->getArgument<string>("cactus .hal file");
-    string dbString = optionsParser->getArgument<string>("cactus dbString");
+    string halFilePath = optionsParser->getArgument<string>("cactus .c2h file");
+    string faFilePath = optionsParser->getArgument<string>("cactus .fa file");
+    string treeString = optionsParser->getArgument<string>("newick tree");
     string outputPath = optionsParser->getArgument<string>("output hal path");
+    string ogString = optionsParser->getOption<string>("outgroups");
+    vector<string> outgroups;
+    if (ogString != "\"\"")
+    {
+      outgroups = chopString(ogString, ",");
+    }
 
     AlignmentPtr alignment;
 
@@ -60,7 +74,8 @@ int main(int argc, char** argv)
       alignment->createNew(outputPath);
     }
     CactusHalConverter converter;
-    converter.convert(halFilePath, dbString, alignment);
+    converter.convert(halFilePath, faFilePath, treeString, alignment, 
+                      outgroups);
   }
 /*  catch(hal_exception& e)
   {

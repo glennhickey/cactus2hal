@@ -18,8 +18,8 @@ import xml.etree.ElementTree as ET
 from cactus.progressive.multiCactusProject import MultiCactusProject
 from cactus.progressive.multiCactusTree import MultiCactusTree
 from cactus.progressive.experimentWrapper import ExperimentWrapper
-from cactus.progressive.ktserverLauncher import KtserverLauncher
 from sonLib.bioio import system
+from sonLib.nxnewick import NXNewick
 
 def initParser():
     parser = argparse.ArgumentParser(description = 'Convert Cactus database to HAL database ', 
@@ -29,6 +29,8 @@ def initParser():
                              help="cactus project xml file")
     parser.add_argument('HAL_file_path', type=str, action = 'store', 
                              help="file path where newly created HAL file is to be stored.")
+    parser.add_argument('--event', type=str, action = 'store', default=None,
+                        help='root event of the input phylogeny')
     parser.add_argument('--cacheBytes', type=int, default=None,
                       help="maximum size in bytes of regular hdf5 cache")
     parser.add_argument('--cacheMDC', type=int, default=None,
@@ -59,20 +61,33 @@ def main():
     # some quick stats
     totalTime = time.time()
     totalAppendTime = 0
-    
+
     # traverse tree to make sure we are going breadth-first
     tree = myProj.mcTree
-    for node in tree.breadthFirstTraversal():
+
+    # find subtree if event specified
+    event = args['event']
+    rootNode = None
+    if event is not None:
+        assert event in tree.nameToId and not tree.isLeaf(tree.nameToId[event])
+        rootNode = tree.nameToId[event]
+
+    for node in tree.breadthFirstTraversal(rootNode):
         genomeName = tree.getName(node)
         if genomeName in myProj.expMap:
             experimentFilePath = myProj.expMap[genomeName]
             experiment = ExperimentWrapper(ET.parse(experimentFilePath).getroot())
 
-            if experiment.getDbType() == "kyoto_tycoon":
-                ktserver = KtserverLauncher()
-                ktserver.spawnServer(experiment, readOnly=True)
+            outgroups = experiment.getOutgroupEvents()
+            expTreeString = NXNewick().writeString(experiment.getTree())
+            assert len(expTreeString) > 1
+            assert experiment.getHALPath() is not None
+            assert experiment.getHALFastaPath() is not None
 
-            cmdline = "time halAppendCactusSubtree {0} \'{1}\' {2}".format(experiment.getHALPath(), experiment.getDiskDatabaseString(), args['HAL_file_path'])
+            cmdline = "time halAppendCactusSubtree \'{0}\' \'{1}\' \'{2}\' \'{3}\'".format(experiment.getHALPath(), experiment.getHALFastaPath(), expTreeString, args['HAL_file_path'])
+            
+            if len(outgroups) > 0:
+                cmdline += " --outgroups {0}".format(",".join(outgroups))
             if args["cacheBytes"] is not None:
                 cmdline += " --cacheBytes {0}".format(args["cacheBytes"])
             if args["cacheMDC"] is not None:
@@ -92,10 +107,7 @@ def main():
             appendTime = time.time() - appendTime
             totalAppendTime += appendTime
 #            print "time of above command: {0:.2f}".format(appendTime)
-
-            if experiment.getDbType() == "kyoto_tycoon":            
-                ktserver.killServer(experiment)
-
+ 
     totalTime = time.time() - totalTime
     print "total time: {0:.2f}  total halAppendCactusSubtree time: {1:.2f}".format(totalTime, totalAppendTime)
                          
