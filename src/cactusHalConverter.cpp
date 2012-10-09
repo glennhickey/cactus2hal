@@ -277,7 +277,6 @@ void CactusHalConverter::scanBottomSegment(CactusHalBottomSegment& botSegment)
     bottomSeg->setChildReversed(i, false);
   }
   bottomSeg->setTopParseIndex(NULL_INDEX);
-  bottomSeg->setTopParseOffset(0);
   
   _nameMap.insert(pair<Name, hal_index_t>(botSegment._name,
                                           bottomSeg->getArrayIndex()));
@@ -299,7 +298,6 @@ void CactusHalConverter::scanTopSegment(CactusHalTopSegment& topSegment)
   topSeg->setParentReversed(topSegment._reversed);
   topSeg->setParentIndex(NULL_INDEX);
   topSeg->setBottomParseIndex(NULL_INDEX);
-  topSeg->setBottomParseOffset(0);
   topSeg->setNextParalogyIndex(NULL_INDEX);
 
   if (topSegment._parent != NULL_NAME)
@@ -420,8 +418,6 @@ void CactusHalConverter::updateParseInfo()
            (hal_index_t)(bottomSeg->getStartPosition() + bottomSeg->getLength()) &&
            topSeg->getStartPosition() >= bottomSeg->getStartPosition());
     topSeg->setBottomParseIndex(bottomSeg->getArrayIndex());
-    topSeg->setBottomParseOffset(topSeg->getStartPosition() - 
-                                 bottomSeg->getStartPosition());
 
     bottomSeg = NULL; // typo prevention
 
@@ -447,8 +443,6 @@ void CactusHalConverter::updateParseInfo()
            (hal_index_t)topSeg->getLength())
     {
       bottomSeg2->setTopParseIndex(topSeg->getArrayIndex());
-      bottomSeg2->setTopParseOffset(bottomSeg2->getStartPosition() - 
-                                    topSeg->getStartPosition());
       bottomParseIterator2->toRight();
       bottomSeg2 = bottomParseIterator2->getBottomSegment();
     }
@@ -456,7 +450,6 @@ void CactusHalConverter::updateParseInfo()
   else
   {
      topSeg->setBottomParseIndex(NULL_INDEX);
-     topSeg->setBottomParseOffset(0);
   }
 }
 
@@ -486,7 +479,6 @@ void CactusHalConverter::updateRootParseInfo()
     if (bstart >= tstart && bstart < tend)
     {
       bseg->setTopParseIndex(tseg->getArrayIndex());
-      bseg->setTopParseOffset(bstart - tstart);
     }
     if (bend <= tend || bstart == bend)
     {
@@ -496,7 +488,6 @@ void CactusHalConverter::updateRootParseInfo()
     if (tstart >= bstart && tstart < bend)
     {
       tseg->setBottomParseIndex(bseg->getArrayIndex());
-      tseg->setBottomParseOffset(tstart - bstart);
     }
     if (tend <= bend || tstart == tend)
     {
