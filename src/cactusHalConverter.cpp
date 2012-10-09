@@ -270,9 +270,7 @@ void CactusHalConverter::scanBottomSegment(CactusHalBottomSegment& botSegment)
   }
   BottomSegment* bottomSeg = _bottomIterator->getBottomSegment();
   hal_index_t startPos = _halSequence->getStartPosition() + botSegment._start;
-  bottomSeg->setStartPosition(startPos);
-  bottomSeg->setLength(botSegment._length);
-  bottomSeg->setNextParalogyIndex(NULL_INDEX);
+  bottomSeg->setCoordinates(startPos, botSegment._length);
   for (hal_size_t i = 0; i < bottomSeg->getNumChildren(); ++i)
   {
     bottomSeg->setChildIndex(i, NULL_INDEX);
@@ -294,10 +292,10 @@ void CactusHalConverter::scanTopSegment(CactusHalTopSegment& topSegment)
     return;
   }
   TopSegment* topSeg = _topIterator->getTopSegment();
-  assert (topSeg->getArrayIndex() < topSeg->getGenome()->getNumTopSegments());
+  assert (topSeg->getArrayIndex() < 
+          (hal_index_t)topSeg->getGenome()->getNumTopSegments());
   hal_index_t startPos = _halSequence->getStartPosition() + topSegment._start;
-  topSeg->setStartPosition(startPos);
-  topSeg->setLength(topSegment._length);
+  topSeg->setCoordinates(startPos, topSegment._length);
   topSeg->setParentReversed(topSegment._reversed);
   topSeg->setParentIndex(NULL_INDEX);
   topSeg->setBottomParseIndex(NULL_INDEX);
@@ -424,8 +422,8 @@ void CactusHalConverter::updateParseInfo()
       _bottomParseIterator->toRight();
       bottomSeg = _bottomParseIterator->getBottomSegment();
     }
-    assert(topSeg->getStartPosition() < bottomSeg->getStartPosition() +
-           bottomSeg->getLength() &&
+    assert(topSeg->getStartPosition() < 
+           (hal_index_t)(bottomSeg->getStartPosition() + bottomSeg->getLength()) &&
            topSeg->getStartPosition() >= bottomSeg->getStartPosition());
     topSeg->setBottomParseIndex(bottomSeg->getArrayIndex());
     topSeg->setBottomParseOffset(topSeg->getStartPosition() - 
