@@ -360,8 +360,6 @@ void CactusHalConverter::updateDescent()
 
     // circularlize the linked list
     topSegment->setNextParalogyIndex(firstSegment->getArrayIndex());
-    topSegment->setNextParalogyReversed(firstSegment->getParentReversed() !=
-                                        topSegment->getParentReversed());
 
     DupCache::iterator cacheIt = _dupCache.find(
       GenCoord(topGenome, firstSegment->getArrayIndex()));
@@ -371,8 +369,6 @@ void CactusHalConverter::updateDescent()
     {
       assert(cacheIt == _dupCache.end());
       firstSegment->setNextParalogyIndex(topSegment->getArrayIndex());
-      firstSegment->setNextParalogyReversed(firstSegment->getParentReversed() !=
-                                            topSegment->getParentReversed());
     }
     // otherwise, find it in the map
     else
@@ -388,8 +384,6 @@ void CactusHalConverter::updateDescent()
       assert(prevSegment->getNextParalogyIndex() == 
              firstSegment->getArrayIndex());
       prevSegment->setNextParalogyIndex(topSegment->getArrayIndex());
-      prevSegment->setNextParalogyReversed(prevSegment->getParentReversed() !=
-                                           topSegment->getParentReversed());
     }
     // add the segment's index to the map
     if (cacheIt == _dupCache.end())
