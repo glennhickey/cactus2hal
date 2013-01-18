@@ -15,8 +15,8 @@ include  ${sonLibRootPath}/include.mk
 
 dataSetsPath=/Users/hickey/Documents/Devel/genomes/datasets
 
-cflags += -I ${sonLibPath} -I ${cactusPath} -I ${halPath} 
-cppflags += -I ${sonLibPath} -I ${cactusPath} -I ${halPath} -D__STDC_LIMIT_MACROS -Wno-deprecated
+cflags += -I ${sonLibPath} -I ${cactusPath} -I ${halPath} ${tokyoCabinetIncl} ${kyotoTycoonIncl}
+cppflags += -I ${sonLibPath} -I ${cactusPath} -I ${halPath} ${tokyoCabinetIncl} ${kyotoTycoonIncl} -D__STDC_LIMIT_MACROS -Wno-deprecated
 basicLibs = ${halPath}/halLib.a ${sonLibPath}/sonLib.a ${sonLibPath}/cuTest.a 
 basicLibsDependencies = ${sonLibPath}/cuTest.a 
 

@@ -214,6 +214,7 @@ void CactusHalConverter::setGenomeSequenceStrings(Genome* genome)
   string buffer;
   SequenceIteratorPtr sequenceIterator = genome->getSequenceIterator();
   SequenceIteratorConstPtr end = genome->getSequenceEndIterator();
+  bool castWarning = false;
   for (; sequenceIterator != end; sequenceIterator->toNext())
   {
     hal::Sequence* sequence = sequenceIterator->getSequence();
@@ -221,6 +222,37 @@ void CactusHalConverter::setGenomeSequenceStrings(Genome* genome)
     {
       _dimensionScanner.getSequence(genome->getName(), sequence->getName(), 
                                     buffer);
+      // HAL does not presently support some conventional tags such
+      // as in http://en.wikipedia.org/wiki/Nucleic_acid_notation
+      // so we cast them all to N
+      for (size_t i = 0; i < buffer.length(); ++i)
+      {
+        switch (buffer[i]) {
+        case 'k': case 'm': case 'r': case 'y': case 'u': case 's': case 'w':
+        case 'b': case 'd': case 'h': case 'v':
+          if (castWarning == false)
+          {
+            cerr << "cactus2hal warning: converting " << buffer[i] << " to n in "
+                 << "sequence " << sequence->getName() << " in genome "
+                 << genome->getName() << endl; 
+            castWarning = true;
+          }
+          break;
+          buffer[i] = 'n'; 
+        case 'K': case 'M': case 'R': case 'Y': case 'U': case 'S': case 'W':
+        case 'B': case 'D': case 'H': case 'V':
+          if (castWarning == false)
+          {
+            cerr << "cactus2hal warning: converting " << buffer[i] << " to N in "
+                 << "sequence " << sequence->getName() << " in genome "
+                 << genome->getName() << endl; 
+            castWarning = true;
+          }
+          buffer[i] = 'N'; 
+          break;
+        default: break;
+        }
+      }
       sequence->setString(buffer);
     }
   }
