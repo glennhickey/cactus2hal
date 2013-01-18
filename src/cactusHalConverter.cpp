@@ -103,11 +103,17 @@ void CactusHalConverter::convertGenomes()
         //case 2: add a new leaf to the alignment
         if (genome == NULL)
         {
-          stTree* parent = stTree_getParent(node);
+          string stNodeName = stTree_getLabel(node);
+          string stRootName = stTree_getLabel(root);
+          if (stNodeName == stRootName)
+          {
+            throw hal_exception("Fatal tree error. Cannot import root " +
+                                stRootName + " because it does not exist in "
+                                "nonEmpty hal tree.");
+          }
+                                                        
           double length = stTree_getBranchLength(node);
-          genome = _alignment->addLeafGenome(stTree_getLabel(node),
-                                             stTree_getLabel(parent),
-                                             length);
+          genome = _alignment->addLeafGenome(stNodeName, stRootName, length);
         }
         //case 3: update an existing internal node, which must be
         //the root of the given tree.
