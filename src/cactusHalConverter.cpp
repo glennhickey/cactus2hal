@@ -237,8 +237,8 @@ void CactusHalConverter::setGenomeSequenceStrings(Genome* genome)
                  << genome->getName() << endl; 
             castWarning = true;
           }
-          break;
           buffer[i] = 'n'; 
+          break;
         case 'K': case 'M': case 'R': case 'Y': case 'U': case 'S': case 'W':
         case 'B': case 'D': case 'H': case 'V':
           if (castWarning == false)
