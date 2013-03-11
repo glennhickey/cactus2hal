@@ -43,7 +43,7 @@ int main(int argc, char** argv)
     optionsParser->printUsage(cerr);
     exit(1);
   }
-  // try
+  try
   {
     string halFilePath = optionsParser->getArgument<string>("cactus .c2h file");
     string faFilePath = optionsParser->getArgument<string>("cactus .fa file");
@@ -77,7 +77,7 @@ int main(int argc, char** argv)
     converter.convert(halFilePath, faFilePath, treeString, alignment, 
                       outgroups);
   }
-/*  catch(hal_exception& e)
+  catch(hal_exception& e)
   {
     cerr << "hal exception caught: " << e.what() << endl;
     return 1;
@@ -87,6 +87,6 @@ int main(int argc, char** argv)
     cerr << "Exception caught: " << e.what() << endl;
     return 1;
   }
-*/
+
   return 0;
 }

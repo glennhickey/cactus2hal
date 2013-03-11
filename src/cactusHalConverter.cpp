@@ -103,11 +103,17 @@ void CactusHalConverter::convertGenomes()
         //case 2: add a new leaf to the alignment
         if (genome == NULL)
         {
-          stTree* parent = stTree_getParent(node);
+          string stNodeName = stTree_getLabel(node);
+          string stRootName = stTree_getLabel(root);
+          if (stNodeName == stRootName)
+          {
+            throw hal_exception("Fatal tree error. Cannot import root " +
+                                stRootName + " because it does not exist in "
+                                "nonEmpty hal tree.");
+          }
+                                                        
           double length = stTree_getBranchLength(node);
-          genome = _alignment->addLeafGenome(stTree_getLabel(node),
-                                             stTree_getLabel(parent),
-                                             length);
+          genome = _alignment->addLeafGenome(stNodeName, stRootName, length);
         }
         //case 3: update an existing internal node, which must be
         //the root of the given tree.
@@ -231,8 +237,8 @@ void CactusHalConverter::setGenomeSequenceStrings(Genome* genome)
                  << genome->getName() << endl; 
             castWarning = true;
           }
-          break;
           buffer[i] = 'n'; 
+          break;
         case 'K': case 'M': case 'R': case 'Y': case 'U': case 'S': case 'W':
         case 'B': case 'D': case 'H': case 'V':
           if (castWarning == false)
@@ -302,16 +308,13 @@ void CactusHalConverter::scanBottomSegment(CactusHalBottomSegment& botSegment)
   }
   BottomSegment* bottomSeg = _bottomIterator->getBottomSegment();
   hal_index_t startPos = _halSequence->getStartPosition() + botSegment._start;
-  bottomSeg->setStartPosition(startPos);
-  bottomSeg->setLength(botSegment._length);
-  bottomSeg->setNextParalogyIndex(NULL_INDEX);
+  bottomSeg->setCoordinates(startPos, botSegment._length);
   for (hal_size_t i = 0; i < bottomSeg->getNumChildren(); ++i)
   {
     bottomSeg->setChildIndex(i, NULL_INDEX);
     bottomSeg->setChildReversed(i, false);
   }
   bottomSeg->setTopParseIndex(NULL_INDEX);
-  bottomSeg->setTopParseOffset(0);
   
   _nameMap.insert(pair<Name, hal_index_t>(botSegment._name,
                                           bottomSeg->getArrayIndex()));
@@ -326,14 +329,13 @@ void CactusHalConverter::scanTopSegment(CactusHalTopSegment& topSegment)
     return;
   }
   TopSegment* topSeg = _topIterator->getTopSegment();
-  assert (topSeg->getArrayIndex() < topSeg->getGenome()->getNumTopSegments());
+  assert (topSeg->getArrayIndex() < 
+          (hal_index_t)topSeg->getGenome()->getNumTopSegments());
   hal_index_t startPos = _halSequence->getStartPosition() + topSegment._start;
-  topSeg->setStartPosition(startPos);
-  topSeg->setLength(topSegment._length);
+  topSeg->setCoordinates(startPos, topSegment._length);
   topSeg->setParentReversed(topSegment._reversed);
   topSeg->setParentIndex(NULL_INDEX);
   topSeg->setBottomParseIndex(NULL_INDEX);
-  topSeg->setBottomParseOffset(0);
   topSeg->setNextParalogyIndex(NULL_INDEX);
 
   if (topSegment._parent != NULL_NAME)
@@ -394,8 +396,6 @@ void CactusHalConverter::updateDescent()
 
     // circularlize the linked list
     topSegment->setNextParalogyIndex(firstSegment->getArrayIndex());
-    topSegment->setNextParalogyReversed(firstSegment->getParentReversed() !=
-                                        topSegment->getParentReversed());
 
     DupCache::iterator cacheIt = _dupCache.find(
       GenCoord(topGenome, firstSegment->getArrayIndex()));
@@ -405,8 +405,6 @@ void CactusHalConverter::updateDescent()
     {
       assert(cacheIt == _dupCache.end());
       firstSegment->setNextParalogyIndex(topSegment->getArrayIndex());
-      firstSegment->setNextParalogyReversed(firstSegment->getParentReversed() !=
-                                            topSegment->getParentReversed());
     }
     // otherwise, find it in the map
     else
@@ -422,8 +420,6 @@ void CactusHalConverter::updateDescent()
       assert(prevSegment->getNextParalogyIndex() == 
              firstSegment->getArrayIndex());
       prevSegment->setNextParalogyIndex(topSegment->getArrayIndex());
-      prevSegment->setNextParalogyReversed(prevSegment->getParentReversed() !=
-                                           topSegment->getParentReversed());
     }
     // add the segment's index to the map
     if (cacheIt == _dupCache.end())
@@ -456,12 +452,10 @@ void CactusHalConverter::updateParseInfo()
       _bottomParseIterator->toRight();
       bottomSeg = _bottomParseIterator->getBottomSegment();
     }
-    assert(topSeg->getStartPosition() < bottomSeg->getStartPosition() +
-           bottomSeg->getLength() &&
+    assert(topSeg->getStartPosition() < 
+           (hal_index_t)(bottomSeg->getStartPosition() + bottomSeg->getLength()) &&
            topSeg->getStartPosition() >= bottomSeg->getStartPosition());
     topSeg->setBottomParseIndex(bottomSeg->getArrayIndex());
-    topSeg->setBottomParseOffset(topSeg->getStartPosition() - 
-                                 bottomSeg->getStartPosition());
 
     bottomSeg = NULL; // typo prevention
 
@@ -487,8 +481,6 @@ void CactusHalConverter::updateParseInfo()
            (hal_index_t)topSeg->getLength())
     {
       bottomSeg2->setTopParseIndex(topSeg->getArrayIndex());
-      bottomSeg2->setTopParseOffset(bottomSeg2->getStartPosition() - 
-                                    topSeg->getStartPosition());
       bottomParseIterator2->toRight();
       bottomSeg2 = bottomParseIterator2->getBottomSegment();
     }
@@ -496,7 +488,6 @@ void CactusHalConverter::updateParseInfo()
   else
   {
      topSeg->setBottomParseIndex(NULL_INDEX);
-     topSeg->setBottomParseOffset(0);
   }
 }
 
@@ -526,7 +517,6 @@ void CactusHalConverter::updateRootParseInfo()
     if (bstart >= tstart && bstart < tend)
     {
       bseg->setTopParseIndex(tseg->getArrayIndex());
-      bseg->setTopParseOffset(bstart - tstart);
     }
     if (bend <= tend || bstart == bend)
     {
@@ -536,7 +526,6 @@ void CactusHalConverter::updateRootParseInfo()
     if (tstart >= bstart && tstart < bend)
     {
       tseg->setBottomParseIndex(bseg->getArrayIndex());
-      tseg->setBottomParseOffset(tstart - bstart);
     }
     if (tend <= bend || tstart == tend)
     {
