@@ -59,7 +59,6 @@ void CactusHalConverter::clear()
   _nameMap.clear();
   _childIdxMap.clear();
   _dupCache.clear();
-  _skipSequences.clear();
   _active = false;
   _outgroups.clear();
 }
@@ -89,48 +88,47 @@ void CactusHalConverter::convertGenomes()
     bool existingGenome = false;
     bfQueue.pop_front();
     GenMapType::const_iterator mapIt = genMap->find(name);
-    if (mapIt != genMap->end())
+    
+    //case 1: add a new root to the alignment
+    if (_alignment->getNumGenomes() == 0)
     {
-      //case 1: add a new root to the alignment
-      if (_alignment->getNumGenomes() == 0)
+      rootName = stTree_getLabel(node);
+      genome = _alignment->addRootGenome(stTree_getLabel(node));
+    }
+    else
+    {
+      genome = _alignment->openGenome(stTree_getLabel(node));
+      //case 2: add a new leaf to the alignment
+      if (genome == NULL)
       {
-        rootName = stTree_getLabel(node);
-        genome = _alignment->addRootGenome(stTree_getLabel(node));
+        string stNodeName = stTree_getLabel(node);
+        string stRootName = stTree_getLabel(root);
+        if (stNodeName == stRootName)
+        {
+          throw hal_exception("Fatal tree error. Cannot import root " +
+                              stRootName + " because it does not exist in "
+                              "nonEmpty hal tree.");
+        }
+                                                        
+        double length = stTree_getBranchLength(node);
+        genome = _alignment->addLeafGenome(stNodeName, stRootName, length);
       }
+      //case 3: update an existing internal node, which must be
+      //the root of the given tree.
       else
       {
-        genome = _alignment->openGenome(stTree_getLabel(node));
-        //case 2: add a new leaf to the alignment
-        if (genome == NULL)
+        if (stTree_getChildNumber(node) == 0 || rootName.empty() == false)
         {
-          string stNodeName = stTree_getLabel(node);
-          string stRootName = stTree_getLabel(root);
-          if (stNodeName == stRootName)
-          {
-            throw hal_exception("Fatal tree error. Cannot import root " +
-                                stRootName + " because it does not exist in "
-                                "nonEmpty hal tree.");
-          }
-                                                        
-          double length = stTree_getBranchLength(node);
-          genome = _alignment->addLeafGenome(stNodeName, stRootName, length);
+          throw hal_exception(string("Fatal Tree error.  converter "
+                                     "does not support adding more than one non-"
+                                     "leaf:") + genome->getName());
         }
-        //case 3: update an existing internal node, which must be
-        //the root of the given tree.
-        else
-        {
-          if (stTree_getChildNumber(node) == 0 || rootName.empty() == false)
-          {
-            throw hal_exception(string("Fatal Tree error.  converter "
-                                       "does not support adding more than one non-"
-                                       "leaf:") + genome->getName());
-          }
-          rootName = stTree_getLabel(node);
-          existingGenome = true;
-        }
+        rootName = stTree_getLabel(node);
+        existingGenome = true;
       }
-      readGenomes.push_back(pair<Genome*, bool>(genome, existingGenome));
     }
+    readGenomes.push_back(pair<Genome*, bool>(genome, existingGenome));
+    
 
     int32_t numChildren = stTree_getChildNumber(node);
     for (int32_t i = 0; i < numChildren; ++i)
@@ -150,15 +148,17 @@ void CactusHalConverter::convertGenomes()
     Genome* genome = readGenomes[i].first;
     bool existingGenome = readGenomes[i].second;
     GenMapType::const_iterator mapIt = genMap->find(genome->getName());
-    assert(mapIt != genMap->end());
-    const vector<hal::Sequence::Info>* dims = mapIt->second;    
-
-    // set / update the genome's dimensions
-    setGenomeDimensions(genome, dims, existingGenome);
-    if (existingGenome == false)
+    if (mapIt != genMap->end())
     {
-      // copy in the dna sequence from the cactus database
-      setGenomeSequenceStrings(genome);
+      const vector<hal::Sequence::Info>* dims = mapIt->second;    
+
+      // set / update the genome's dimensions
+      setGenomeDimensions(genome, dims, existingGenome);
+      if (existingGenome == false)
+      {
+        // copy in the dna sequence from the cactus database
+        setGenomeSequenceStrings(genome);
+      }
     }
   }
 
@@ -199,10 +199,6 @@ void CactusHalConverter::setGenomeDimensions(
           genome->getSequence(info._name) != NULL)
       {
         updateDimensions.push_back(update);        
-      }
-      else
-      {
-        _skipSequences.insert(info._name);
       }
     }
     genome->updateBottomDimensions(updateDimensions);
@@ -266,8 +262,7 @@ void CactusHalConverter::convertSegments()
 void CactusHalConverter::scanSequence(CactusHalSequence& sequence)
 {
   _active = _outgroups.find(sequence._event) == _outgroups.end();
-  if (_active == false || 
-      _skipSequences.find(sequence._name) != _skipSequences.end())
+  if (_active == false) 
   {
     return;
   }
@@ -279,24 +274,22 @@ void CactusHalConverter::scanSequence(CactusHalSequence& sequence)
                         " in the database");
   }
   _halSequence = genome->getSequence(sequence._name);
-  if (_halSequence == NULL)
+
+  if (_halSequence != NULL)
   {
-    throw hal_exception(string("Cannot locate sequence") + sequence._name +
-                        "in the genome " + sequence._event);
-  }
-  
-  if (sequence._isBottom == true)
-  {
-    _bottomIterator = _halSequence->getBottomSegmentIterator();
-  }
-  else
-  {
-    if (genome->getNumBottomSegments() > 0)
+    if (sequence._isBottom == true)
     {
-      _parentIterator = _halSequence->getBottomSegmentIterator();
-      _bottomParseIterator = _halSequence->getBottomSegmentIterator();
+      _bottomIterator = _halSequence->getBottomSegmentIterator();
     }
-    _topIterator = _halSequence->getTopSegmentIterator();
+    else
+    {
+      if (genome->getNumBottomSegments() > 0)
+      {
+        _parentIterator = _halSequence->getBottomSegmentIterator();
+        _bottomParseIterator = _halSequence->getBottomSegmentIterator();
+      }
+      _topIterator = _halSequence->getTopSegmentIterator();
+    }
   }
 }
 
@@ -328,6 +321,7 @@ void CactusHalConverter::scanTopSegment(CactusHalTopSegment& topSegment)
   {
     return;
   }
+  
   TopSegment* topSeg = _topIterator->getTopSegment();
   assert (topSeg->getArrayIndex() < 
           (hal_index_t)topSeg->getGenome()->getNumTopSegments());
