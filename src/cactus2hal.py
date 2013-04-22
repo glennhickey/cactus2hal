@@ -43,6 +43,10 @@ def initParser():
                       help="hdf5 chunk size")
     parser.add_argument('--deflate', type=int, default=None,
                       help="hdf5 compression factor")
+    parser.add_argument('--inMemory', action = 'store_true', default=False,
+                      help="keep entire hdf5 arrays in memory, overriding"
+                        " the cache.")
+
 
     return vars(parser.parse_args())
         
@@ -100,6 +104,9 @@ def main():
                 cmdline += " --chunk {0}".format(args["chunk"])
             if args["deflate"] is not None:
                 cmdline += " --deflate {0}".format(args["deflate"])
+            if args["inMemory"] is True:
+                cmdline += " --inMemory"
+
             
             print cmdline
             appendTime = time.time()
