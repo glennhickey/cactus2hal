@@ -46,7 +46,7 @@ void FastaReader::close()
 void FastaReader::skip()
 {
   char buffer;
-  while (!_faFile.bad() && 
+  while (_faFile.good() && 
          (isspace(_faFile.peek()) || _faFile.peek() == ';'))
   {
     _faFile.get(buffer);
@@ -158,11 +158,11 @@ void FastaReader::getSequence(const string& genomeName,
   
   outSequence.erase();
   string buffer;
-  while (_faFile && !isspace(_faFile.peek()) && _faFile.peek() != ';' &&
-         _faFile.peek() != '>')
+  while (_faFile.good() && _faFile.peek() != ';' && _faFile.peek() != '>')
   {
     _faFile >> buffer;
     outSequence += buffer;
+    skip();
   }
   
   if (outSequence.length() == 0)
