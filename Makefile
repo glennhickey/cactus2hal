@@ -15,7 +15,7 @@ clean :
 test: all
 #	python tests/allTests.py
 
-${libPath}/cactus2halLib.a : ${libSources} ${libHeaders} ${basicLibsDependencies} ${basicLibs}
+${libPath}/cactus2halLib.a : ${libSources} ${libHeaders} ${basicLibsDependencies} 
 	${cpp} ${cppflags} -I inc -I src -c ${libSources}
 	ar rc cactus2halLib.a *.o
 	ranlib cactus2halLib.a 
