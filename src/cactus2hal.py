@@ -17,7 +17,7 @@ import argparse,sys,os,subprocess,time
 import xml.etree.ElementTree as ET
 from cactus.progressive.multiCactusProject import MultiCactusProject
 from cactus.progressive.multiCactusTree import MultiCactusTree
-from cactus.progressive.experimentWrapper import ExperimentWrapper
+from cactus.shared.experimentWrapper import ExperimentWrapper
 from sonLib.bioio import system
 from sonLib.nxnewick import NXNewick
 
