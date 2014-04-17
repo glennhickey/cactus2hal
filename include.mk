@@ -41,8 +41,4 @@ ifdef ENABLE_UDC
 	basicLibs += ${KENTSRC}/src/lib/${MACHTYPE}/jkweb.a  ${SAMTABIXDIR}/libsamtabix.a -lssl -lcrypto
 endif
 
-ifeq (${SYS},Darwin) #This is to deal with the Mavericks replacing gcc with clang fully and changing libraries
-	cppflags += -stdlib=libstdc++
-	cflags += -stdlib=libstdc++
-endif
 
