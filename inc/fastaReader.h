@@ -33,7 +33,8 @@ public:
 protected:
 
    void skip();
-   void skipToSequence(const std::string& sequenceName);
+   void parseHeader(std::string& name, std::string& comment);
+   std::streampos skipToSequence(const std::string& sequenceName);
 
    typedef std::pair<std::string, std::string> SeqKey;
    typedef std::map<SeqKey, std::streampos> Bookmarks;
