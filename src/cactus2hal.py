@@ -80,10 +80,11 @@ def main():
         genomeName = tree.getName(node)
         if genomeName in myProj.expMap:
             experimentFilePath = myProj.expMap[genomeName]
+            print experimentFilePath
             experiment = ExperimentWrapper(ET.parse(experimentFilePath).getroot())
 
             outgroups = experiment.getOutgroupEvents()
-            expTreeString = NXNewick().writeString(experiment.getTree())
+            expTreeString = NXNewick().writeString(experiment.getTree(onlyThisSubtree=True))
             assert len(expTreeString) > 1
             assert experiment.getHALPath() is not None
             assert experiment.getHALFastaPath() is not None
