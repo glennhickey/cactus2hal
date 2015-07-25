@@ -104,12 +104,6 @@ protected:
 
    // keep track of last current duplicate segment per genome
    DupCache _dupCache;
-
-   // hack to skip empty sequences since they do not appear
-   // in both top and bottom hal files and therefore violoate
-   // the assumption that the sequences are present in both.
-   // should be temporary hack until cactus .hal's are fixed
-   std::set<std::string> _skipSequences;
 };
 
 

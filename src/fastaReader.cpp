@@ -33,7 +33,7 @@ void FastaReader::open(const string& faPath)
   _faFile.open(faPath.c_str());
   if (!_faFile)
   {
-    throw runtime_error("error opening fasta file " + faPath);
+    throw runtime_error("error opening fasta file" + faPath);
   }
 }
 
@@ -45,10 +45,8 @@ void FastaReader::close()
 
 void FastaReader::skip()
 {
-  // Skip to the next non-comment line in the FASTA. Assumes we are currently at
-  // the start of a line.
   char buffer;
-  while (!_faFile.bad() && 
+  while (_faFile.good() && 
          (isspace(_faFile.peek()) || _faFile.peek() == ';'))
   {
     _faFile.get(buffer);
@@ -62,55 +60,10 @@ void FastaReader::skip()
   }
 }
 
-void FastaReader::parseHeader(string& name, string& comment) 
+void FastaReader::skipToSequence(const string& sequenceName)
 {
-  // Parse out a sequence name and a comment from a FASTA header. Populates its
-  // arguments. Returns the stream position of the ">" for ther header.
-  
-  string header = "";
-  
-  while(header.size() == 0) 
-  {
-    if(!getline(_faFile, header)) 
-    {
-      stringstream ss;
-      ss << "Error reading sequence header";
-      throw runtime_error(ss.str());
-    }
-  }
-  
-  if(header[0] != '>') 
-  {
-    stringstream ss;
-    ss << "Error: expected \">\"";
-    throw runtime_error(ss.str());
-  }
-  
-  // Where does the sequence name stop and the sequence comment start?
-  size_t nameStop = header.find_first_of(", \t\v");
-  
-  if(nameStop != string::npos) 
-  {
-    // Parse out name and comment.
-    name = header.substr(1, nameStop - 1);
-    comment = header.substr(nameStop, header.size() - nameStop + 1);
-  } 
-  else 
-  {
-    // Parse out name and give a blank comment.
-    name = header.substr(1, header.size() - 1);
-    comment = "";
-  }
-  
-}
-
-streampos FastaReader::skipToSequence(const string& sequenceName)
-{
-  // Skip to the record for the given sequence.
-  // Returns the stream position of the ">".
-  string name;
-  string comment;
-  streampos toReturn;
+  string buffer;
+  char c;
   while (_faFile.bad() != true)
   {
     skip();
@@ -121,24 +74,19 @@ streampos FastaReader::skipToSequence(const string& sequenceName)
       ss << ".. got \"" << (char)_faFile.peek() << "\" when expecting \">\"";
       throw runtime_error(ss.str());
     }
-    // We found the ">"
-    toReturn = _faFile.tellg();
-    parseHeader(name, comment);
-    if (name == sequenceName)
+    _faFile.get(c);
+    _faFile >> buffer;
+    if (buffer == sequenceName)
     {
       break;
     }
-  }
-  
-  // We know it was the right one. Return its location.
-  return toReturn;
+  }    
 }
 
 void FastaReader::bookmarkNextSequence(const string& genomeName,
                                        const string& sequenceName)
 {
-  // Work out where that sequence is.
-  streampos seqPos = skipToSequence(sequenceName);
+  skipToSequence(sequenceName);
   if (!_faFile)
   {
     stringstream ss;
@@ -154,7 +102,8 @@ void FastaReader::bookmarkNextSequence(const string& genomeName,
        << sequenceName << ": already added to map";
     throw runtime_error(ss.str());
   }
-  _bookmarks.insert(pair<SeqKey, streampos>(key, seqPos));
+  streampos pos = _faFile.tellg() - (streamoff)sequenceName.length();
+  _bookmarks.insert(pair<SeqKey, streampos>(key, pos));
   char buf;
   do
   {
@@ -178,7 +127,6 @@ void FastaReader::getSequence(const string& genomeName,
     throw runtime_error(ss.str());
   }
   
-  // Seek back to the ">" for that sequence.
   _faFile.seekg(i->second);
 
   if (!_faFile)
@@ -188,21 +136,20 @@ void FastaReader::getSequence(const string& genomeName,
        << sequenceName << " from fasta file";
     throw runtime_error(ss.str());
   }
-  string name;
-  string comment;
-  parseHeader(name, comment);
-  if (!_faFile || name.length() < 1)
+  string header;
+  _faFile >> header;
+  if (!_faFile || header.length() < 1)
   {
     stringstream ss;
     ss << "Error reading sequence " << genomeName << ", "
        << sequenceName << " from fasta file";
     throw runtime_error(ss.str());
   }
-  if (name != sequenceName)
+  if (header != sequenceName)
   {
     stringstream ss;
     ss << "Error reading sequence " << genomeName << ", "
-       << sequenceName << "; Got >" << name << " " << comment << " instead";
+       << sequenceName << " differs from header " << header;
     throw runtime_error(ss.str());
 
   }
@@ -211,18 +158,11 @@ void FastaReader::getSequence(const string& genomeName,
   
   outSequence.erase();
   string buffer;
-  while (_faFile && _faFile.peek() != '>' && getline(_faFile, buffer))
+  while (_faFile.good() && _faFile.peek() != ';' && _faFile.peek() != '>')
   {
-    // For each FASTA line
-    
-    if(buffer.size() == 0 || buffer[0] == ';')
-    {
-      // Skip empty lines and comment lines
-      continue;
-    }
-    
-    // Copy the line (without trailing newline) to the output sequence.
+    _faFile >> buffer;
     outSequence += buffer;
+    skip();
   }
   
   if (outSequence.length() == 0)

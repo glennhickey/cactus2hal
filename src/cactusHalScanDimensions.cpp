@@ -103,11 +103,7 @@ void CactusHalScanDimensions::flushCurrentIntoMap()
       _genomeMap.insert(pair<string, vector<hal::Sequence::Info>*>(
                           _currentGenome, infoVec));
     }
-    if (_currentInfo._length > 0)
-    {
-      _faReader.bookmarkNextSequence(_currentGenome, _currentInfo._name);
-    }
-
+    _faReader.bookmarkNextSequence(_currentGenome, _currentInfo._name);
   }
   resetCurrent();
 }

@@ -18,7 +18,7 @@ dataSetsPath=/Users/hickey/Documents/Devel/genomes/datasets
 cflags += -I ${sonLibPath} -I ${cactusPath} -I ${halPath} ${tokyoCabinetIncl} ${kyotoTycoonIncl}
 cppflags += -I ${sonLibPath} -I ${cactusPath} -I ${halPath} ${tokyoCabinetIncl} ${kyotoTycoonIncl} -D__STDC_LIMIT_MACROS -Wno-deprecated
 basicLibs = ${halPath}/halLib.a ${sonLibPath}/sonLib.a ${sonLibPath}/cuTest.a 
-basicLibsDependencies = ${sonLibPath}/cuTest.a 
+basicLibsDependencies = ${basicLibs}
 
 # hdf5 compilation is done through its wrappers.
 # we can speficy our own (sonlib) compilers with these variables:
@@ -28,3 +28,17 @@ HDF5_CC = ${cxx}
 HDF5_CCLINKER = ${cxx} 
 cpp = h5c++ ${h5prefix}
 cxx = h5cc ${h5prefix}
+
+# add compiler flag and kent paths if udc is enabled
+# relies on KENTSRC containing path to top level kent/ dir
+# and MACHTYPE being specified
+ifdef ENABLE_UDC
+#  Find samtabix as in kent/src/inc/common.mk:
+	ifeq (${SAMTABIXDIR},)
+		SAMTABIXDIR = /hive/data/outside/samtabix/${MACHTYPE}
+	endif
+
+	basicLibs += ${KENTSRC}/src/lib/${MACHTYPE}/jkweb.a  ${SAMTABIXDIR}/libsamtabix.a -lssl -lcrypto
+endif
+
+
