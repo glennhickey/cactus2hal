@@ -46,7 +46,9 @@ def initParser():
     parser.add_argument('--inMemory', action = 'store_true', default=False,
                       help="keep entire hdf5 arrays in memory, overriding"
                         " the cache.")
-
+    parser.add_argument('--append', action='store_true', default=False,
+                        help='append to an existing hal file instead of '
+                        'overwriting')
 
     return vars(parser.parse_args())
         
@@ -58,9 +60,10 @@ def main():
     myProj = MultiCactusProject()
     myProj.readXML(args['cactus_project'])
 
-    # for now we do not support appending at the script level
-    print 'rm -f {0}'.format(args['HAL_file_path'])
-    system('rm -f {0}'.format(args['HAL_file_path']))
+    if not args['append']:
+        # Overwrite existing hal
+        print 'rm -f {0}'.format(args['HAL_file_path'])
+        system('rm -f {0}'.format(args['HAL_file_path']))
 
     # some quick stats
     totalTime = time.time()
